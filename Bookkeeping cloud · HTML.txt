@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Multi-Company Bookkeeper ERP — Cloud Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --text: #0f172a;
+            --border: #cbd5e1;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --info: #0284c7;
+            --purple: #7c3aed;
+            --teal: #0d9488;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .company-bar { background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .company-bar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .company-bar-left label { color: #94a3b8; margin: 0; font-size: 12px; }
+        .company-bar-left select { background: #0f172a; color: #f8fafc; border: 1px solid #475569; padding: 6px 12px; font-weight: 700; font-size: 13px; width: auto; border-radius: 6px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 15px 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        h1 { margin: 0; font-size: 20px; font-weight: 700; }
+        .active-company-title { font-size: 14px; color: var(--primary); font-weight: 600; margin-top: 2px; }
+        .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; align-items: start; }
+        .square-card { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); }
+        .square-card h2 { font-size: 14px; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .report-date-header { font-size: 11px; color: #64748b; font-weight: 600; margin: -6px 0 10px 0; text-transform: none; letter-spacing: 0; }
+        .form-group { margin-bottom: 8px; }
+        .form-row { display: flex; gap: 8px; }
+        .form-row .form-group { flex: 1; }
+        label { display: block; font-size: 11px; font-weight: 600; margin-bottom: 3px; color: #475569; }
+        .hint { font-size: 10px; color: #94a3b8; margin-top: -2px; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 7px 8px; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; background-color: #f8fafc; }
+        button { width: 100%; padding: 8px; color: white; font-size: 11px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; margin-top: 6px; transition: background 0.15s ease; }
+        .btn-primary { background-color: var(--primary); } .btn-sale { background-color: var(--success); } .btn-purchase { background-color: var(--danger); }
+        .btn-payroll { background-color: var(--purple); } .btn-info { background-color: var(--info); } .btn-teal { background-color: var(--teal); }
+        .btn-warning { background-color: var(--warning); } .btn-secondary { background-color: #475569; }
+        .btn-action { width: auto; padding: 4px 8px; font-size: 10px; margin-top: 0; display: inline-block; }
+        .btn-pay { background-color: var(--success); } .btn-edit { background-color: var(--warning); } .btn-delete { background-color: var(--danger); }
+        .btn-print { background-color: #475569; width: auto; padding: 4px 10px; font-size: 11px; margin-top: 0; }
+        button:hover { opacity: 0.9; } button:disabled { opacity: 0.4; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+        th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #64748b; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .badge-current { background: #dcfce7; color: #15803d; } .badge-30 { background: #fef9c3; color: #a16207; }
+        .badge-60 { background: #ffedd5; color: #c2410c; } .badge-90 { background: #fee2e2; color: #b91c1c; }
+        .status-paid { color: var(--success); font-weight: bold; } .status-unpaid { color: var(--warning); font-weight: bold; } .status-partial { color: var(--info); font-weight: bold; }
+        .indent { padding-left: 14px; color: #475569; } .journal-header { background-color: #f1f5f9; font-weight: bold; } .journal-ref { color: #94a3b8; font-weight: normal; font-size: 10px; }
+        .filter-banner { background: #e0f2fe; border: 1px solid #7dd3fc; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; color: #0369a1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;}
+        .search-box { margin-bottom: 8px; }
+        .asset-row-table td { font-size: 10px; }
+        .recon-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
+        .recon-row input[type="checkbox"] { width: auto; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; border-radius: 12px; width: 400px; max-width: 90vw; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .print-company-header { display: none; margin-bottom: 10px; border-bottom: 2px solid #0f172a; padding-bottom: 5px; }
+        .print-company-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .print-company-header p { margin: 0; font-size: 11px; color: #475569; }
+        @media print {
+            body * { visibility: hidden; }
+            .printable-section, .printable-section * { visibility: visible; }
+            .printable-section { position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; }
+            .btn-print, .top-actions, .company-bar, .filter-banner { display: none !important; }
+            .print-company-header { display: block !important; }
+        }
+ 
+        /* AUTH SCREEN */
+        #authOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background:#0f172a; display:flex; align-items:center; justify-content:center; z-index: 2000; }
+        .auth-box { background:white; border-radius: 14px; padding: 30px; width: 360px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .auth-box h1 { font-size: 18px; text-align:center; margin-bottom: 4px; }
+        .auth-box p.sub { text-align:center; color:#64748b; font-size: 12px; margin-bottom: 20px; }
+        .auth-tabs { display:flex; gap:8px; margin-bottom: 16px; }
+        .auth-tabs button { margin-top:0; background:#e2e8f0; color:#475569; }
+        .auth-tabs button.active { background: var(--primary); color:white; }
+        #authError { color: var(--danger); font-size: 11px; text-align:center; min-height: 14px; margin-bottom: 4px; }
+        #authLoading { text-align:center; color:#64748b; font-size: 12px; }
+        .app-hidden { display:none; }
+        .user-chip { font-size:11px; color:#94a3b8; }
+    </style>
+</head>
+<body>
+ 
+    <!-- AUTH GATE -->
+    <div id="authOverlay">
+        <div class="auth-box">
+            <h1>💼 Bookkeeper ERP</h1>
+            <p class="sub">Cloud edition — your data, safely stored, everywhere you log in.</p>
+            <div class="auth-tabs">
+                <button id="tabSignIn" class="active" onclick="setAuthMode('signin')">Sign In</button>
+                <button id="tabSignUp" onclick="setAuthMode('signup')">Create Account</button>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="authEmail" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="authPassword" placeholder="At least 6 characters">
+            </div>
+            <div id="authError"></div>
+            <button class="btn-primary" id="authSubmitBtn" onclick="submitAuth()">Sign In</button>
+            <div id="authLoading" style="display:none;">Working on it...</div>
+        </div>
+    </div>
+ 
+    <div id="appRoot" class="app-hidden">
+ 
+    <div class="company-bar">
+        <div class="company-bar-left">
+            <label for="companySelect">🏢 ACTIVE CLIENT / ENTITY:</label>
+            <select id="companySelect" onchange="switchCompany(this.value)"></select>
+            <button class="btn-action" style="background:var(--success); width:auto;" onclick="openNewCompanyModal()">+ Add New Company</button>
+            <span class="user-chip" id="userChip"></span>
+        </div>
+        <div>
+            <button class="btn-action" style="background:#475569; width:auto;" onclick="signOut()">🚪 Sign Out</button>
+        </div>
+    </div>
+ 
+    <div class="header-bar">
+        <div>
+            <h1>💼 Multi-Entity Business Ledger ERP</h1>
+            <div id="activeCompanySubtitle" class="active-company-title">Loading...</div>
+        </div>
+        <div class="top-actions">
+            <button class="btn-info btn-action" onclick="exportData()">📥 Export Active Company (JSON)</button>
+            <button class="btn-delete btn-action" onclick="deleteCurrentCompany()">🗑️ Delete Company</button>
+        </div>
+    </div>
+ 
+    <div class="filter-banner">
+        <div>
+            <strong>📅 Active Reporting Date Range Filter:</strong>
+            <input type="date" id="filterStartDate" style="width:130px; display:inline-block; margin:0 5px;" onchange="renderDashboard()">
+            to
+            <input type="date" id="filterEndDate" style="width:130px; display:inline-block; margin:0 5px;" onchange="renderDashboard()">
+        </div>
+        <button class="btn-primary btn-action" onclick="clearDateFilter()">Clear Range Filter</button>
+    </div>
+ 
+    <div id="loadingBanner" style="text-align:center; padding: 20px; color:#64748b;">Loading your data...</div>
+ 
+    <div class="dashboard-grid" id="dashboardGrid" style="display:none;">
+ 
+        <div class="square-card" style="border-top: 4px solid var(--info);">
+            <h2 style="color: var(--info);">0. Opening Balances</h2>
+            <form id="openingForm">
+                <div class="form-row">
+                    <div class="form-group"><label>Opening Cash/Bank ($)</label><input type="number" id="opCash" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label>Opening AR ($)</label><input type="number" id="opAR" step="0.01" min="0" value="0"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Opening AP ($)</label><input type="number" id="opAP" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label>Owner Capital ($)</label><input type="number" id="opCapital" step="0.01" min="0" value="0"></div>
+                </div>
+                <button type="submit" class="btn-info">💾 Save Opening Balances</button>
+            </form>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--teal);">
+            <h2 style="color: var(--teal);">0B. Owner Capital & Equity Draws</h2>
+            <form id="ownerEquityForm">
+                <div class="form-row">
+                    <div class="form-group"><label>Date</label><input type="date" id="equityDate" required></div>
+                    <div class="form-group"><label>Transaction Type</label>
+                        <select id="equityType">
+                            <option value="Contribution">Owner Contribution (+ Cash In)</option>
+                            <option value="Draw">Owner Draw / Withdrawal (- Cash Out)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Amount ($)</label><input type="number" id="equityAmt" step="0.01" min="0" required></div>
+                <div class="form-group"><label>Memo / Description</label><input type="text" id="equityMemo" placeholder="e.g. Personal funds added" required></div>
+                <button type="submit" class="btn-teal">+ Record Owner Equity Transfer</button>
+            </form>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--success);">
+            <h2 style="color: var(--success);">1. Sales / Revenue (+ IN)</h2>
+            <form id="salesForm">
+                <input type="hidden" id="editSaleId">
+                <div class="form-row">
+                    <div class="form-group"><label>Date</label><input type="date" id="saleDate" required></div>
+                    <div class="form-group"><label>Invoice # (Auto)</label><input type="text" id="invoiceNum" readonly style="font-weight:bold; background:#e2e8f0;"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Payment Method</label>
+                        <select id="salePayment" onchange="toggleSplitFields()">
+                            <option value="Cash">Cash</option><option value="Card">Card</option><option value="Bank">Bank Transfer</option>
+                            <option value="Invoice">Pay Later (Full Invoice)</option>
+                            <option value="Split">Split Payment (Cash + On Account)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" placeholder="e.g. Acme Corp" required></div>
+                </div>
+                <div class="form-group"><label>Item / Service Sold</label><input type="text" id="itemSold" placeholder="e.g. Consulting" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Amount ($)</label><input type="number" id="saleAmt" step="0.01" min="0" required oninput="updateSplitOwed()"></div>
+                    <div class="form-group"><label>Sales Tax Collected ($)</label><input type="number" id="saleTax" step="0.01" min="0" value="0" oninput="updateSplitOwed()"></div>
+                </div>
+                <div class="form-row" id="splitFieldsRow" style="display:none;">
+                    <div class="form-group"><label>Cash Received Now ($)</label><input type="number" id="saleCashNow" step="0.01" min="0" value="0" oninput="updateSplitOwed()"></div>
+                    <div class="form-group"><label>Amount Owed on Account ($)</label><input type="number" id="saleOwed" step="0.01" min="0" readonly style="background:#e2e8f0; font-weight:bold;"></div>
+                </div>
+                <button type="submit" class="btn-sale" id="saleBtn">+ Register Sale / Invoice</button>
+            </form>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--danger);">
+            <h2 style="color: var(--danger);">2. Expenses & Bills (- OUT)</h2>
+            <form id="purchaseForm">
+                <input type="hidden" id="editPurchaseId">
+                <div class="form-row">
+                    <div class="form-group"><label>Date</label><input type="date" id="purchaseDate" required></div>
+                    <div class="form-group"><label>Category</label><select id="expenseCategory"></select></div>
+                </div>
+                <div class="hint" id="categoryTypeHint"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Payment Method</label>
+                        <select id="purchasePayment" onchange="togglePurchaseSplitFields()">
+                            <option value="Cash">Cash</option><option value="Card">Card</option><option value="Bank">Bank Transfer</option>
+                            <option value="Bill">Pay Later (Full Bill)</option>
+                            <option value="Split">Split Payment (Cash + On Account)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Supplier / Vendor</label><input type="text" id="vendorName" placeholder="e.g. Landlord / Vendor" required></div>
+                </div>
+                <div class="form-group"><label>Description</label><input type="text" id="itemBought" placeholder="e.g. Monthly Office Rent" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Amount ($)</label><input type="number" id="purchaseAmt" step="0.01" min="0" required oninput="updatePurchaseSplitOwed()"></div>
+                    <div class="form-group"><label>Tax Paid ($)</label><input type="number" id="purchaseTax" step="0.01" min="0" value="0" oninput="updatePurchaseSplitOwed()"></div>
+                </div>
+                <div class="form-row" id="purchaseSplitFieldsRow" style="display:none;">
+                    <div class="form-group"><label>Cash Paid Now ($)</label><input type="number" id="purchaseCashNow" step="0.01" min="0" value="0" oninput="updatePurchaseSplitOwed()"></div>
+                    <div class="form-group"><label>Amount Owed on Account ($)</label><input type="number" id="purchaseOwed" step="0.01" min="0" readonly style="background:#e2e8f0; font-weight:bold;"></div>
+                </div>
+                <button type="submit" class="btn-purchase" id="purchaseBtn">+ Register Expense / Bill</button>
+            </form>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--purple);">
+            <h2 style="color: var(--purple);">3. Payroll & Wages</h2>
+            <form id="payrollForm">
+                <div class="form-row">
+                    <div class="form-group"><label>Pay Period Start</label><input type="date" id="payPeriodStart" required></div>
+                    <div class="form-group"><label>Pay Period End</label><input type="date" id="payPeriodEnd" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Payment Date</label><input type="date" id="payDate" required></div>
+                    <div class="form-group"><label>Employee Name</label><input type="text" id="empName" placeholder="e.g. Sarah Smith" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Gross Pay ($)</label><input type="number" id="grossPay" step="0.01" min="0" required></div>
+                    <div class="form-group"><label>Employee Tax Withholding ($)</label><input type="number" id="taxWithheld" step="0.01" min="0" value="0"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Employer Payroll Tax ($)</label><input type="number" id="employerTax" step="0.01" min="0" value="0">
+                        <div class="hint">Employer's own match — liability, not deducted from employee</div>
+                    </div>
+                    <div class="form-group"><label>Payment Method</label><select id="payMethod"><option value="Bank">Bank Transfer</option><option value="Cash">Cash</option></select></div>
+                </div>
+                <div class="form-group"><label>Net Pay ($)</label><input type="number" id="netPayDisplay" readonly placeholder="Auto-calculated"></div>
+                <button type="submit" class="btn-payroll">+ Process Payroll</button>
+            </form>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid #475569;">
+            <h2 style="color: #475569;">3B. Fixed Assets & Depreciation</h2>
+            <form id="assetForm">
+                <div class="form-row">
+                    <div class="form-group"><label>Acquisition Date</label><input type="date" id="assetDate" required></div>
+                    <div class="form-group"><label>Asset Name</label><input type="text" id="assetName" placeholder="e.g. Delivery Van" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Purchase Cost ($)</label><input type="number" id="assetCost" step="0.01" min="0" required></div>
+                    <div class="form-group"><label>Salvage Value ($)</label><input type="number" id="assetSalvage" step="0.01" min="0" value="0"></div>
+                </div>
+                <div class="form-group"><label>Useful Life (Years)</label><input type="number" id="assetLife" min="1" max="40" value="5" required>
+                    <div class="hint">Typical range: 3–40 years. You'll get a warning outside that range.</div>
+                </div>
+                <button type="submit" class="btn-secondary">+ Capitalize Fixed Asset</button>
+            </form>
+            <div style="margin-top:10px;"><button type="button" class="btn-warning" onclick="processAnnualDepreciation()">📉 Run Straight-Line Annual Depreciation</button></div>
+            <div style="margin-top:10px; max-height:160px; overflow-y:auto;">
+                <table class="asset-row-table" id="assetListTable"><thead><tr><th>Asset</th><th>Cost</th><th>Accum. Depr.</th><th>Book Value</th><th>Action</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+ 
+        <div class="square-card" style="grid-column: span 1;">
+            <h2>Central Transaction Log</h2>
+            <div class="search-box"><input type="text" id="txnSearch" placeholder="🔍 Search by party, item, or description..." oninput="renderDashboard()"></div>
+            <div style="max-height: 320px; overflow-y: auto;">
+                <table id="txnTable"><thead><tr><th>Date</th><th>Ref / Party / Item</th><th>Total ($)</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+ 
+        <div class="square-card">
+            <h2 style="color: var(--warning);">Accounts Receivable Aging</h2>
+            <div style="max-height: 320px; overflow-y: auto;">
+                <table id="agingTable"><thead><tr><th>Inv # / Customer</th><th>Amount ($)</th><th>Age</th><th>Bucket</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--warning);">
+            <h2 style="color: var(--warning);">Tax Payables & Settlements</h2>
+            <table>
+                <tr><td>Sales Tax Collected Payable:</td><td id="lblSalesTaxPayable" style="font-weight:bold;">$0.00</td></tr>
+                <tr><td>Next Sales Tax Due Date:</td><td><input type="date" id="salesTaxDueDate" onchange="saveTaxDueDates()" style="padding:3px;"></td></tr>
+                <tr><td colspan="2"><button class="btn-warning" onclick="remitTax('Sales')">🏛️ Remit Sales Tax to Government</button></td></tr>
+                <tr><td>Employee Tax Withholding Payable:</td><td id="lblPayrollTaxPayable" style="font-weight:bold;">$0.00</td></tr>
+                <tr><td>Employer Payroll Tax Payable:</td><td id="lblEmployerTaxPayable" style="font-weight:bold;">$0.00</td></tr>
+                <tr><td>Next Payroll Tax Due Date:</td><td><input type="date" id="payrollTaxDueDate" onchange="saveTaxDueDates()" style="padding:3px;"></td></tr>
+                <tr><td colspan="2"><button class="btn-warning" onclick="remitTax('Payroll')">🏛️ Remit Payroll Tax to Authority</button></td></tr>
+            </table>
+            <div style="margin-top:10px;"><label>Remittance History</label>
+                <div style="max-height:100px; overflow-y:auto;"><table id="remittanceHistoryTable"><thead><tr><th>Date</th><th>Type</th><th>Amount</th></tr></thead><tbody></tbody></table></div>
+            </div>
+        </div>
+ 
+        <div class="square-card" style="border-top: 4px solid var(--primary);">
+            <h2 style="color: var(--primary);">Bank Reconciliation</h2>
+            <div class="form-group"><label>Target Bank Statement Ending Date</label><input type="date" id="reconDate" onchange="renderReconciliation()"></div>
+            <div class="form-group"><label>Actual Bank Statement Ending Balance ($)</label><input type="number" id="statementBal" step="0.01" placeholder="0.00" oninput="renderReconciliation()"></div>
+            <div class="hint">Check off each transaction that has cleared your bank statement:</div>
+            <div id="reconTxnList" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:6px;"></div>
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-top:8px; font-size:11px;">
+                <div>Book Cash Balance: <strong id="reconBookBal">$0.00</strong></div>
+                <div>Statement Balance: <strong id="reconStmtBal">$0.00</strong></div>
+                <div>Outstanding (Uncleared) Items: <strong id="reconOutstanding">$0.00</strong></div>
+                <hr style="border:0; border-top:1px solid #cbd5e1; margin:6px 0;">
+                <div style="font-size:12px;">Unreconciled Variance: <strong id="reconVariance" style="color:var(--danger);">$0.00</strong></div>
+            </div>
+            <button class="btn-primary" style="margin-top:8px;" onclick="saveReconciliationSnapshot()">💾 Save Reconciliation Record</button>
+            <div style="margin-top:8px;"><label>Past Reconciliations</label><div id="reconHistoryList" style="font-size:10px; max-height:80px; overflow-y:auto;"></div></div>
+        </div>
+ 
+        <div class="square-card">
+            <h2>Chart of Accounts Editor</h2>
+            <div class="form-row">
+                <div class="form-group"><label>New Category Name</label><input type="text" id="newCatName" placeholder="e.g. Subscriptions"></div>
+                <div class="form-group"><label>Account Type</label>
+                    <select id="newCatType">
+                        <option value="Expense">Expense (5000s)</option>
+                        <option value="Inventory">Inventory Purchase (Asset, 1000s)</option>
+                        <option value="Asset">Other Asset (1000s)</option>
+                        <option value="Liability">Liability (2000s)</option>
+                        <option value="Equity">Equity (3000s)</option>
+                        <option value="Revenue">Revenue (4000s)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addNewCategory()">+ Add Account Category</button>
+            <div style="margin-top:10px; max-height:150px; overflow-y:auto;">
+                <table id="coaTable"><thead><tr><th>#</th><th>Category</th><th>Type</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+ 
+        <div class="square-card" style="grid-column: span 1;">
+            <h2><span>General Journal</span><button class="btn-print" style="margin:0;" onclick="openManualJournalEntry()">+ Manual Entry</button></h2>
+            <div style="max-height: 280px; overflow-y: auto;">
+                <table id="journalTable"><thead><tr><th>Account Name & Explanation</th><th>Debit ($)</th><th>Credit ($)</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+ 
+        <div class="square-card" id="incStmtCard">
+            <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Income Statement (P&L Report)</p></div>
+            <h2><span>Income Statement (P&L)</span><button class="btn-print" onclick="printCard('incStmtCard')">🖨️ Print</button></h2>
+            <div class="report-date-header" id="incDateHeader">For the period ended —</div>
+            <table>
+                <tr><td>Sales Revenue:</td><td id="incSales">$0.00</td></tr>
+                <tr class="journal-header"><td colspan="2">OPERATING EXPENSES</td></tr>
+                <tbody id="incExpensesBody"></tbody>
+                <tr><td class="indent">Depreciation Expense:</td><td id="incDepr">$0.00</td></tr>
+                <tr style="font-weight: bold; font-size: 13px; border-top: 2px solid #000;"><td>Net Operating Income:</td><td id="incNetProfit">$0.00</td></tr>
+            </table>
+        </div>
+ 
+        <div class="square-card" id="balSheetCard">
+            <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Balance Sheet Financial Statement</p></div>
+            <h2><span>Balance Sheet</span><button class="btn-print" onclick="printCard('balSheetCard')">🖨️ Print</button></h2>
+            <div class="report-date-header" id="bsDateHeader">As of —</div>
+            <table>
+                <tr class="journal-header"><td colspan="2">ASSETS</td></tr>
+                <tr><td class="indent">Cash & Bank Balance:</td><td id="bsCash">$0.00</td></tr>
+                <tr><td class="indent">Accounts Receivable (AR):</td><td id="bsAR">$0.00</td></tr>
+                <tr><td class="indent">Inventory:</td><td id="bsInventory">$0.00</td></tr>
+                <tr><td class="indent">Fixed Assets (Cost):</td><td id="bsFixedAssets">$0.00</td></tr>
+                <tr><td class="indent">Less: Accumulated Depreciation:</td><td id="bsAccumDepr">($0.00)</td></tr>
+                <tr style="font-weight: bold;"><td>Total Assets:</td><td id="bsTotalAssets">$0.00</td></tr>
+                <tr class="journal-header"><td colspan="2">LIABILITIES & EQUITY</td></tr>
+                <tr><td class="indent">Accounts Payable (AP):</td><td id="bsAP">$0.00</td></tr>
+                <tr><td class="indent">Sales Tax Payable:</td><td id="bsSalesTaxPayable">$0.00</td></tr>
+                <tr><td class="indent">Employee Tax Withholding Payable:</td><td id="bsPayrollTaxPayable">$0.00</td></tr>
+                <tr><td class="indent">Employer Payroll Tax Payable:</td><td id="bsEmployerTaxPayable">$0.00</td></tr>
+                <tr><td class="indent">Owner Contributions (Total):</td><td id="bsContributions">$0.00</td></tr>
+                <tr><td class="indent">Owner Draws (Total):</td><td id="bsDraws">($0.00)</td></tr>
+                <tr><td class="indent">Opening Owner Capital:</td><td id="bsOpeningCapital">$0.00</td></tr>
+                <tr><td class="indent">Current Net Profit:</td><td id="bsRetained">$0.00</td></tr>
+                <tr style="font-weight: bold;"><td>Total Liabilities & Equity:</td><td id="bsTotalLiabEquity">$0.00</td></tr>
+            </table>
+        </div>
+ 
+        <div class="square-card" id="cashFlowCard">
+            <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Cash Flow Statement</p></div>
+            <h2><span>Cash Flow Statement</span><button class="btn-print" onclick="printCard('cashFlowCard')">🖨️ Print</button></h2>
+            <div class="report-date-header" id="cfDateHeader">For the period ended —</div>
+            <table>
+                <tr><td class="indent">Beginning Cash Balance:</td><td id="cfOpCash">$0.00</td></tr>
+                <tr class="journal-header"><td colspan="2">OPERATING ACTIVITIES</td></tr>
+                <tr><td class="indent">Cash Collected from Sales:</td><td id="cfSalesIn">$0.00</td></tr>
+                <tr><td class="indent">Cash Paid for Expenses/Bills:</td><td id="cfPurchasesOut">$0.00</td></tr>
+                <tr><td class="indent">Cash Paid for Payroll:</td><td id="cfPayrollOut">$0.00</td></tr>
+                <tr><td class="indent">Cash Remitted for Taxes:</td><td id="cfTaxOut">$0.00</td></tr>
+                <tr style="font-weight:bold;"><td class="indent">Net Cash from Operating:</td><td id="cfNetOperating">$0.00</td></tr>
+                <tr class="journal-header"><td colspan="2">INVESTING ACTIVITIES</td></tr>
+                <tr><td class="indent">Cash Paid for Fixed Assets:</td><td id="cfAssetsOut">$0.00</td></tr>
+                <tr style="font-weight:bold;"><td class="indent">Net Cash from Investing:</td><td id="cfNetInvesting">$0.00</td></tr>
+                <tr class="journal-header"><td colspan="2">FINANCING ACTIVITIES</td></tr>
+                <tr><td class="indent">Net Owner Contributions/Draws:</td><td id="cfOwnerNet">$0.00</td></tr>
+                <tr style="font-weight:bold;"><td class="indent">Net Cash from Financing:</td><td id="cfNetFinancing">$0.00</td></tr>
+                <tr style="font-weight: bold; border-top: 2px solid #000;"><td>Ending Cash Balance:</td><td id="cfNetCash">$0.00</td></tr>
+            </table>
+        </div>
+ 
+    </div>
+    </div><!-- /appRoot -->
+ 
+    <div class="modal-overlay" id="newCompanyModal">
+        <div class="modal">
+            <h2 style="margin-top:0; border-bottom:1px solid #cbd5e1; padding-bottom:8px;">🏢 Create New Client / Company</h2>
+            <form id="newCompanyForm">
+                <div class="form-group"><label>Company / Legal Name</label><input type="text" id="newCompName" placeholder="e.g. Ali's Market" required></div>
+                <div class="form-group"><label>Industry / Business Type</label><input type="text" id="newCompIndustry" placeholder="e.g. Retail Grocery / Services" required></div>
+                <div class="form-group"><label>Accounting Start Date</label><input type="date" id="newCompStartDate" required></div>
+                <div style="display:flex; gap:8px; margin-top:15px;">
+                    <button type="submit" class="btn-sale">Save & Create Company</button>
+                    <button type="button" class="btn-print" onclick="closeNewCompanyModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+    <script>
+        // ============================================================
+        // SUPABASE CONNECTION
+        // ============================================================
+        const SUPABASE_URL = "https://jkjzgaxbpuftfushhiwd.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpranpnYXhicHVmdGZ1c2hoaXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MDk0MDIsImV4cCI6MjEwMzI4NTQwMn0.bJkQJxjmmB62QBaGK3ArXcXKotg8u2Y3duYdd9Q6XWI";
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ 
+        const todayStr = new Date().toISOString().split('T')[0];
+        let currentUser = null;
+        let companiesList = [];
+        let activeCompanyId = null;
+        let comp = null; // in-memory mirror of the active company's data
+ 
+        function defaultCategories() {
+            return [
+                { name: "Cost of Goods", type: "Expense", account_num: 5010 },
+                { name: "Inventory Purchase", type: "Inventory", account_num: 1210 },
+                { name: "Rent", type: "Expense", account_num: 5020 },
+                { name: "Utilities", type: "Expense", account_num: 5030 },
+                { name: "Office Supplies", type: "Expense", account_num: 5040 },
+                { name: "Advertising", type: "Expense", account_num: 5050 },
+                { name: "General Expense", type: "Expense", account_num: 5090 }
+            ];
+        }
+ 
+        // ============================================================
+        // AUTH UI
+        // ============================================================
+        let authMode = 'signin';
+        function setAuthMode(mode) {
+            authMode = mode;
+            document.getElementById('tabSignIn').classList.toggle('active', mode === 'signin');
+            document.getElementById('tabSignUp').classList.toggle('active', mode === 'signup');
+            document.getElementById('authSubmitBtn').innerText = mode === 'signin' ? 'Sign In' : 'Create Account';
+            document.getElementById('authError').innerText = '';
+        }
+ 
+        async function submitAuth() {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const errEl = document.getElementById('authError');
+            errEl.innerText = '';
+            if (!email || !password) { errEl.innerText = 'Enter both email and password.'; return; }
+            document.getElementById('authLoading').style.display = 'block';
+            document.getElementById('authSubmitBtn').disabled = true;
+ 
+            try {
+                let result;
+                if (authMode === 'signup') {
+                    result = await sb.auth.signUp({ email, password });
+                    if (result.error) throw result.error;
+                    if (result.data.user && !result.data.session) {
+                        errEl.style.color = 'var(--success)';
+                        errEl.innerText = 'Account created! Check your email to confirm, then sign in.';
+                        setAuthMode('signin');
+                        document.getElementById('authLoading').style.display = 'none';
+                        document.getElementById('authSubmitBtn').disabled = false;
+                        return;
+                    }
+                } else {
+                    result = await sb.auth.signInWithPassword({ email, password });
+                    if (result.error) throw result.error;
+                }
+                // success -> onAuthStateChange will handle loading the app
+            } catch (err) {
+                errEl.style.color = 'var(--danger)';
+                errEl.innerText = err.message || 'Something went wrong.';
+                document.getElementById('authLoading').style.display = 'none';
+                document.getElementById('authSubmitBtn').disabled = false;
+            }
+        }
+ 
+        async function signOut() {
+            if (!confirm('Sign out?')) return;
+            await sb.auth.signOut();
+        }
+ 
+        sb.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                currentUser = session.user;
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('appRoot').classList.remove('app-hidden');
+                document.getElementById('userChip').innerText = currentUser.email;
+                loadCompaniesForUser();
+            } else {
+                currentUser = null;
+                document.getElementById('authOverlay').style.display = 'flex';
+                document.getElementById('appRoot').classList.add('app-hidden');
+                document.getElementById('authLoading').style.display = 'none';
+                document.getElementById('authSubmitBtn').disabled = false;
+            }
+        });
+ 
+        // ============================================================
+        // COMPANY LOADING
+        // ============================================================
+        async function loadCompaniesForUser() {
+            const { data, error } = await sb.from('companies').select('*').order('created_at', { ascending: true });
+            if (error) { alert('Error loading companies: ' + error.message); return; }
+            companiesList = data;
+ 
+            if (companiesList.length === 0) {
+                await createCompanyRow('My Business', 'General', todayStr, true);
+                return; // createCompanyRow will re-call loadCompaniesForUser
+            }
+ 
+            if (!activeCompanyId || !companiesList.some(c => c.id === activeCompanyId)) {
+                activeCompanyId = companiesList[0].id;
+            }
+            renderCompanyDropdown();
+            await loadActiveCompanyData();
+        }
+ 
+        function renderCompanyDropdown() {
+            const select = document.getElementById('companySelect');
+            select.innerHTML = '';
+            companiesList.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = c.name;
+                if (c.id === activeCompanyId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+ 
+        async function switchCompany(companyId) {
+            activeCompanyId = companyId;
+            await loadActiveCompanyData();
+        }
+ 
+        async function createCompanyRow(name, industry, startDate, isFirst) {
+            const { data, error } = await sb.from('companies').insert({
+                owner_id: currentUser.id, name, industry, start_date: startDate,
+                opening_cash: 0, opening_ar: 0, opening_ap: 0, opening_capital: 0,
+                invoice_counter: 1001, journal_ref_counter: 1
+            }).select().single();
+            if (error) { alert('Error creating company: ' + error.message); return; }
+ 
+            const catRows = defaultCategories().map(c => ({ ...c, company_id: data.id }));
+            await sb.from('categories').insert(catRows);
+ 
+            activeCompanyId = data.id;
+            await loadCompaniesForUser();
+        }
+ 
+        async function loadActiveCompanyData() {
+            document.getElementById('loadingBanner').style.display = 'block';
+            document.getElementById('dashboardGrid').style.display = 'none';
+ 
+            const companyRow = companiesList.find(c => c.id === activeCompanyId);
+            if (!companyRow) return;
+ 
+            const [catsRes, txnsRes, assetsRes, journalRes, reconRes] = await Promise.all([
+                sb.from('categories').select('*').eq('company_id', activeCompanyId),
+                sb.from('transactions').select('*').eq('company_id', activeCompanyId).order('date', { ascending: true }),
+                sb.from('fixed_assets').select('*').eq('company_id', activeCompanyId),
+                sb.from('journal_entries').select('*').eq('company_id', activeCompanyId).order('date', { ascending: true }),
+                sb.from('reconciliations').select('*').eq('company_id', activeCompanyId).order('saved_at', { ascending: true })
+            ]);
+ 
+            comp = {
+                id: companyRow.id,
+                name: companyRow.name,
+                industry: companyRow.industry,
+                openingBalances: {
+                    cash: parseFloat(companyRow.opening_cash) || 0,
+                    ar: parseFloat(companyRow.opening_ar) || 0,
+                    ap: parseFloat(companyRow.opening_ap) || 0,
+                    capital: parseFloat(companyRow.opening_capital) || 0
+                },
+                invoiceCounter: companyRow.invoice_counter,
+                journalRefCounter: companyRow.journal_ref_counter,
+                taxDueDates: { sales: companyRow.sales_tax_due_date || '', payroll: companyRow.payroll_tax_due_date || '' },
+                categories: (catsRes.data || []).map(c => ({ id: c.id, name: c.name, type: c.type, num: c.account_num })),
+                transactions: (txnsRes.data || []).map(t => ({
+                    id: t.id, type: t.type, ref: t.ref, date: t.date, party: t.party, item: t.item, category: t.category,
+                    method: t.method, amount: parseFloat(t.amount) || 0, tax: parseFloat(t.tax) || 0,
+                    paidNow: parseFloat(t.paid_now) || 0, balanceDue: parseFloat(t.balance_due) || 0, status: t.status,
+                    gross: t.gross !== null ? parseFloat(t.gross) : undefined,
+                    employerTax: t.employer_tax !== null ? parseFloat(t.employer_tax) : 0,
+                    periodStart: t.period_start, periodEnd: t.period_end, equityType: t.equity_type, taxType: t.tax_type,
+                    cleared: t.cleared
+                })),
+                fixedAssets: (assetsRes.data || []).map(a => ({
+                    id: a.id, name: a.name, date: a.date, cost: parseFloat(a.cost) || 0, salvage: parseFloat(a.salvage) || 0,
+                    life: a.life, accumDepr: parseFloat(a.accum_depr) || 0, disposed: a.disposed
+                })),
+                journalEntries: (journalRes.data || []).map(j => ({ id: j.id, ref: j.ref, date: j.date, memo: j.memo, debits: j.debits, credits: j.credits })),
+                reconciliations: (reconRes.data || []).map(r => ({ date: r.date, stmtBal: parseFloat(r.statement_balance) || 0, variance: r.variance }))
+            };
+ 
+            document.getElementById('loadingBanner').style.display = 'none';
+            document.getElementById('dashboardGrid').style.display = 'grid';
+            renderDashboard();
+        }
+ 
+        async function reloadAndRender() {
+            // refresh companies (for opening balances / counters) + active company data
+            const { data } = await sb.from('companies').select('*').order('created_at', { ascending: true });
+            if (data) companiesList = data;
+            await loadActiveCompanyData();
+        }
+ 
+        function openNewCompanyModal() {
+            document.getElementById('newCompStartDate').value = todayStr;
+            document.getElementById('newCompanyModal').style.display = 'flex';
+        }
+        function closeNewCompanyModal() { document.getElementById('newCompanyModal').style.display = 'none'; }
+ 
+        document.getElementById('newCompanyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newCompName').value.trim();
+            const industry = document.getElementById('newCompIndustry').value.trim();
+            const startDate = document.getElementById('newCompStartDate').value;
+            closeNewCompanyModal();
+            this.reset();
+            await createCompanyRow(name, industry, startDate, false);
+        });
+ 
+        async function deleteCurrentCompany() {
+            if (companiesList.length <= 1) return alert('Cannot delete the only remaining company in your workspace.');
+            const companyRow = companiesList.find(c => c.id === activeCompanyId);
+            if (!confirm(`Are you sure you want to permanently delete '${companyRow.name}' and all associated books? This cannot be undone.`)) return;
+            const { error } = await sb.from('companies').delete().eq('id', activeCompanyId);
+            if (error) return alert('Error deleting company: ' + error.message);
+            activeCompanyId = null;
+            await loadCompaniesForUser();
+        }
+ 
+        function exportData() {
+            const backupData = { mode: 'single_company', company: comp, exportedAt: new Date().toISOString() };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `${comp.name.replace(/\s+/g, '_')}_ledger_${todayStr}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+ 
+        async function logAudit(action, details) {
+            try {
+                await sb.from('audit_log').insert({ company_id: activeCompanyId, user_id: currentUser.id, user_email: currentUser.email, action, details });
+            } catch (e) { /* audit logging failures should never block the user's work */ }
+        }
+ 
+        async function addJournalEntry(date, memo, debits, credits) {
+            const ref = `JE-${String(comp.journalRefCounter).padStart(4, '0')}`;
+            await sb.from('journal_entries').insert({ company_id: activeCompanyId, ref, date, memo, debits, credits });
+            await sb.from('companies').update({ journal_ref_counter: comp.journalRefCounter + 1 }).eq('id', activeCompanyId);
+        }
+ 
+        function getNextInvoiceNum() { return `INV-${comp.invoiceCounter}`; }
+ 
+        function populateCategoryDropdowns() {
+            const sel = document.getElementById('expenseCategory');
+            const prevVal = sel.value;
+            sel.innerHTML = '';
+            comp.categories.filter(c => c.type === 'Expense' || c.type === 'Inventory').forEach(c => {
+                sel.innerHTML += `<option value="${c.name}">${c.name}${c.type === 'Inventory' ? ' (Inventory Asset)' : ''}</option>`;
+            });
+            if (prevVal) sel.value = prevVal;
+            updateCategoryTypeHint();
+ 
+            const coaBody = document.querySelector('#coaTable tbody');
+            coaBody.innerHTML = '';
+            comp.categories.slice().sort((a,b) => a.num - b.num).forEach(c => {
+                coaBody.innerHTML += `<tr>
+                    <td>${c.num}</td><td>${c.name}</td><td>${c.type}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editCategory('${c.id}')">Edit</button>
+                        <button class="btn-action btn-delete" onclick="deleteCategory('${c.id}')">Del</button>
+                    </td>
+                </tr>`;
+            });
+        }
+ 
+        document.getElementById('expenseCategory').addEventListener('change', updateCategoryTypeHint);
+        function updateCategoryTypeHint() {
+            const sel = document.getElementById('expenseCategory');
+            const cat = comp.categories.find(c => c.name === sel.value);
+            document.getElementById('categoryTypeHint').innerText = (cat && cat.type === 'Inventory') ? "This posts to Inventory (Asset) — not an immediate expense." : "";
+        }
+ 
+        async function addNewCategory() {
+            const name = document.getElementById('newCatName').value.trim();
+            const type = document.getElementById('newCatType').value;
+            if (!name) return alert('Enter category name');
+            if (comp.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return alert('Category exists');
+            const base = { Asset: 1000, Inventory: 1200, Liability: 2000, Equity: 3000, Revenue: 4000, Expense: 5000 }[type];
+            const existingInRange = comp.categories.filter(c => Math.floor(c.num/1000)*1000 === base);
+            const num = base + (existingInRange.length + 1) * 10;
+            const { error } = await sb.from('categories').insert({ company_id: activeCompanyId, name, type, account_num: num });
+            if (error) return alert('Error: ' + error.message);
+            document.getElementById('newCatName').value = '';
+            await reloadAndRender();
+        }
+ 
+        async function editCategory(catId) {
+            const cat = comp.categories.find(c => c.id === catId);
+            if (!cat) return;
+            const newName = prompt("Rename category:", cat.name);
+            if (newName === null || !newName.trim()) return;
+            await sb.from('categories').update({ name: newName.trim() }).eq('id', catId);
+            await reloadAndRender();
+        }
+ 
+        async function deleteCategory(catId) {
+            const cat = comp.categories.find(c => c.id === catId);
+            if (!cat) return;
+            if (comp.transactions.some(t => t.category === cat.name)) {
+                return alert("Can't delete — this category is used by existing transactions. Rename it instead, or re-categorize those transactions first.");
+            }
+            if (!confirm(`Delete category '${cat.name}'?`)) return;
+            await sb.from('categories').delete().eq('id', catId);
+            await reloadAndRender();
+        }
+ 
+        function toggleSplitFields() {
+            const method = document.getElementById('salePayment').value;
+            document.getElementById('splitFieldsRow').style.display = method === 'Split' ? 'flex' : 'none';
+            updateSplitOwed();
+        }
+        function updateSplitOwed() {
+            const amt = parseFloat(document.getElementById('saleAmt').value) || 0;
+            const tax = parseFloat(document.getElementById('saleTax').value) || 0;
+            const cashNow = parseFloat(document.getElementById('saleCashNow').value) || 0;
+            document.getElementById('saleOwed').value = Math.max(0, (amt + tax) - cashNow).toFixed(2);
+        }
+        function togglePurchaseSplitFields() {
+            const method = document.getElementById('purchasePayment').value;
+            document.getElementById('purchaseSplitFieldsRow').style.display = method === 'Split' ? 'flex' : 'none';
+            updatePurchaseSplitOwed();
+        }
+        function updatePurchaseSplitOwed() {
+            const amt = parseFloat(document.getElementById('purchaseAmt').value) || 0;
+            const tax = parseFloat(document.getElementById('purchaseTax').value) || 0;
+            const cashNow = parseFloat(document.getElementById('purchaseCashNow').value) || 0;
+            document.getElementById('purchaseOwed').value = Math.max(0, (amt + tax) - cashNow).toFixed(2);
+        }
+ 
+        // ============================================================
+        // MAIN RENDER (operates on the in-memory `comp` mirror)
+        // ============================================================
+        function renderDashboard() {
+            renderCompanyDropdown();
+            populateCategoryDropdowns();
+            document.getElementById('invoiceNum').value = getNextInvoiceNum();
+            document.getElementById('activeCompanySubtitle').innerText = `Active Entity: ${comp.name} (${comp.industry || ''})`;
+            document.querySelectorAll('.printCompName').forEach(el => el.innerText = comp.name);
+            document.querySelectorAll('.printCompIndustry').forEach(el => el.innerText = comp.industry || '');
+            document.getElementById('salesTaxDueDate').value = comp.taxDueDates.sales || '';
+            document.getElementById('payrollTaxDueDate').value = comp.taxDueDates.payroll || '';
+ 
+            document.getElementById('opCash').value = comp.openingBalances.cash;
+            document.getElementById('opAR').value = comp.openingBalances.ar;
+            document.getElementById('opAP').value = comp.openingBalances.ap;
+            document.getElementById('opCapital').value = comp.openingBalances.capital;
+ 
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const searchTerm = (document.getElementById('txnSearch').value || '').toLowerCase();
+ 
+            document.getElementById('incDateHeader').innerText = (startDate || endDate) ? `For the period ${startDate || '…'} to ${endDate || '…'}` : `For the period ended ${todayStr}`;
+            document.getElementById('cfDateHeader').innerText = (startDate || endDate) ? `For the period ${startDate || '…'} to ${endDate || '…'}` : `For the period ended ${todayStr}`;
+            document.getElementById('bsDateHeader').innerText = `As of ${endDate || todayStr}`;
+ 
+            const filteredTxns = comp.transactions.filter(t => {
+                if (startDate && t.date < startDate) return false;
+                if (endDate && t.date > endDate) return false;
+                return true;
+            });
+ 
+            const tbody = document.querySelector('#txnTable tbody');
+            tbody.innerHTML = '';
+            comp.transactions.slice().reverse()
+                .filter(t => {
+                    if (!searchTerm) return true;
+                    const hay = `${t.party || ''} ${t.item || ''} ${t.ref || ''}`.toLowerCase();
+                    return hay.includes(searchTerm);
+                })
+                .forEach(t => {
+                    const total = (t.amount || 0) + (t.tax || 0);
+                    const tr = document.createElement('tr');
+                    let actions = '';
+                    if (t.status === 'Unpaid' || t.status === 'Partial') actions += `<button class="btn-action btn-pay" onclick="markAsPaid('${t.id}')">Pay</button> `;
+                    if (t.type === 'SALE' || t.type === 'PURCHASE') actions += `<button class="btn-action btn-edit" onclick="editTransaction('${t.id}')">Edit</button> `;
+                    actions += `<button class="btn-action btn-delete" onclick="deleteTransaction('${t.id}')">Delete</button>`;
+                    tr.innerHTML = `<td>${t.date}</td><td><b>${t.ref || t.party}</b><br><small>${t.party} - ${t.item} (${t.type})</small></td><td><b>$${total.toFixed(2)}</b></td><td class="status-${(t.status||'').toLowerCase()}">${t.status}</td><td>${actions}</td>`;
+                    tbody.appendChild(tr);
+                });
+ 
+            let totalSales = 0, salesTaxCollected = 0, payrollTaxWithheld = 0, employerTaxAccrued = 0;
+            let salesTaxRemitted = 0, payrollTaxRemitted = 0;
+            let catExpenses = {};
+            comp.categories.filter(c => c.type === 'Expense').forEach(c => catExpenses[c.name] = 0);
+            let inventoryAssetTotal = 0;
+            let unpaidInvoicesAR = 0, unpaidBillsAP = 0;
+            let cashInSales = 0, cashOutExpenses = 0, cashOutPayroll = 0, cashOutTax = 0, cashOutAssets = 0;
+            let totalContributions = 0, totalDraws = 0;
+ 
+            filteredTxns.forEach(t => {
+                const total = (t.amount || 0) + (t.tax || 0);
+                if (t.type === 'SALE') {
+                    totalSales += t.amount;
+                    salesTaxCollected += t.tax;
+                    const bal = t.balanceDue !== undefined ? t.balanceDue : 0;
+                    const paidPortion = total - bal;
+                    unpaidInvoicesAR += bal;
+                    cashInSales += paidPortion;
+                } else if (t.type === 'PURCHASE') {
+                    const catObj = comp.categories.find(c => c.name === t.category);
+                    const catType = catObj ? catObj.type : 'Expense';
+                    const bal = t.balanceDue !== undefined ? t.balanceDue : 0;
+                    const paidPortion = total - bal;
+                    if (catType === 'Inventory') inventoryAssetTotal += t.amount;
+                    else {
+                        if (!catExpenses.hasOwnProperty(t.category)) catExpenses[t.category] = 0;
+                        catExpenses[t.category] += t.amount;
+                    }
+                    unpaidBillsAP += bal;
+                    cashOutExpenses += paidPortion;
+                } else if (t.type === 'PAYROLL') {
+                    if (!catExpenses["Payroll"]) catExpenses["Payroll"] = 0;
+                    catExpenses["Payroll"] += t.gross;
+                    payrollTaxWithheld += t.tax;
+                    employerTaxAccrued += (t.employerTax || 0);
+                    cashOutPayroll += (t.gross - t.tax);
+                } else if (t.type === 'TAX_REMITTANCE') {
+                    if (t.taxType === 'Sales') salesTaxRemitted += t.amount;
+                    if (t.taxType === 'Payroll') payrollTaxRemitted += t.amount;
+                    cashOutTax += t.amount;
+                } else if (t.type === 'EQUITY') {
+                    if (t.equityType === 'Contribution') totalContributions += t.amount;
+                    else totalDraws += t.amount;
+                } else if (t.type === 'ASSET') {
+                    cashOutAssets += t.amount;
+                } else if (t.type === 'ASSET_DISPOSAL') {
+                    cashInSales += t.amount;
+                }
+            });
+ 
+            const netOwnerEquityTransfers = totalContributions - totalDraws;
+            let fixedAssetsCost = 0, totalDepreciation = 0;
+            comp.fixedAssets.filter(a => !a.disposed).forEach(a => { fixedAssetsCost += a.cost; totalDepreciation += a.accumDepr; });
+            renderAssetList();
+ 
+            const agingBody = document.querySelector('#agingTable tbody');
+            agingBody.innerHTML = '';
+            const todayDate = new Date();
+            comp.transactions.filter(t => t.type === 'SALE' && t.balanceDue > 0).forEach(t => {
+                const invDate = new Date(t.date);
+                const diffDays = Math.max(0, Math.ceil((todayDate - invDate) / (1000 * 60 * 60 * 24)));
+                let badgeClass = 'badge-current', bucket = 'Current';
+                if (diffDays > 90) { badgeClass = 'badge-90'; bucket = '90+ Days'; }
+                else if (diffDays > 60) { badgeClass = 'badge-60'; bucket = '61-90 Days'; }
+                else if (diffDays > 30) { badgeClass = 'badge-30'; bucket = '31-60 Days'; }
+                agingBody.innerHTML += `<tr><td><b>${t.ref}</b><br><small>${t.party}</small></td><td>$${t.balanceDue.toFixed(2)}</td><td>${diffDays} days</td><td><span class="badge ${badgeClass}">${bucket}</span></td></tr>`;
+            });
+ 
+            const netSalesTaxPayable = salesTaxCollected - salesTaxRemitted;
+            const netPayrollTaxPayable = payrollTaxWithheld - payrollTaxRemitted;
+            document.getElementById('lblSalesTaxPayable').innerText = `$${netSalesTaxPayable.toFixed(2)}`;
+            document.getElementById('lblPayrollTaxPayable').innerText = `$${netPayrollTaxPayable.toFixed(2)}`;
+            document.getElementById('lblEmployerTaxPayable').innerText = `$${employerTaxAccrued.toFixed(2)}`;
+ 
+            const remitBody = document.querySelector('#remittanceHistoryTable tbody');
+            remitBody.innerHTML = '';
+            comp.transactions.filter(t => t.type === 'TAX_REMITTANCE').slice().reverse().forEach(t => {
+                remitBody.innerHTML += `<tr><td>${t.date}</td><td>${t.taxType}</td><td>$${t.amount.toFixed(2)}</td></tr>`;
+            });
+ 
+            const jbody = document.querySelector('#journalTable tbody');
+            jbody.innerHTML = '';
+            comp.journalEntries.slice().reverse().forEach(j => {
+                jbody.innerHTML += `<tr class="journal-header"><td colspan="3">${j.date} - ${j.memo} <span class="journal-ref">(${j.ref})</span></td></tr>`;
+                (j.debits||[]).forEach(d => jbody.innerHTML += `<tr><td>${d.account}</td><td>$${d.amount.toFixed(2)}</td><td>-</td></tr>`);
+                (j.credits||[]).forEach(c => jbody.innerHTML += `<tr><td class="indent">${c.account}</td><td>-</td><td>$${c.amount.toFixed(2)}</td></tr>`);
+            });
+ 
+            const incExpBody = document.getElementById('incExpensesBody');
+            incExpBody.innerHTML = '';
+            let totalOperatingExp = 0;
+            Object.keys(catExpenses).forEach(cat => {
+                const amt = catExpenses[cat];
+                if (amt > 0) { totalOperatingExp += amt; incExpBody.innerHTML += `<tr><td class="indent">${cat}:</td><td>$${amt.toFixed(2)}</td></tr>`; }
+            });
+            document.getElementById('incDepr').innerText = `$${totalDepreciation.toFixed(2)}`;
+            const netProfit = totalSales - totalOperatingExp - totalDepreciation;
+            document.getElementById('incSales').innerText = `$${totalSales.toFixed(2)}`;
+            const incNetEl = document.getElementById('incNetProfit');
+            incNetEl.innerText = `$${netProfit.toFixed(2)}`;
+            incNetEl.style.color = netProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+ 
+            const netCashFromOps = cashInSales - cashOutExpenses - cashOutPayroll - cashOutTax;
+            const netCashFromFinancing = netOwnerEquityTransfers;
+            const netCashFromInvesting = -cashOutAssets;
+            const currentCash = comp.openingBalances.cash + netCashFromOps + netCashFromFinancing + netCashFromInvesting;
+            const currentAR = comp.openingBalances.ar + unpaidInvoicesAR;
+            const currentAP = comp.openingBalances.ap + unpaidBillsAP;
+            const totalAssets = currentCash + currentAR + inventoryAssetTotal + (fixedAssetsCost - totalDepreciation);
+            const endingOwnerCapital = comp.openingBalances.capital + netOwnerEquityTransfers;
+            const totalLiabEquity = currentAP + netSalesTaxPayable + netPayrollTaxPayable + employerTaxAccrued + endingOwnerCapital + netProfit;
+ 
+            document.getElementById('bsCash').innerText = `$${currentCash.toFixed(2)}`;
+            document.getElementById('bsAR').innerText = `$${currentAR.toFixed(2)}`;
+            document.getElementById('bsInventory').innerText = `$${inventoryAssetTotal.toFixed(2)}`;
+            document.getElementById('bsFixedAssets').innerText = `$${fixedAssetsCost.toFixed(2)}`;
+            document.getElementById('bsAccumDepr').innerText = `($${totalDepreciation.toFixed(2)})`;
+            document.getElementById('bsTotalAssets').innerText = `$${totalAssets.toFixed(2)}`;
+            document.getElementById('bsAP').innerText = `$${currentAP.toFixed(2)}`;
+            document.getElementById('bsSalesTaxPayable').innerText = `$${netSalesTaxPayable.toFixed(2)}`;
+            document.getElementById('bsPayrollTaxPayable').innerText = `$${netPayrollTaxPayable.toFixed(2)}`;
+            document.getElementById('bsEmployerTaxPayable').innerText = `$${employerTaxAccrued.toFixed(2)}`;
+            document.getElementById('bsContributions').innerText = `$${totalContributions.toFixed(2)}`;
+            document.getElementById('bsDraws').innerText = `($${totalDraws.toFixed(2)})`;
+            document.getElementById('bsOpeningCapital').innerText = `$${comp.openingBalances.capital.toFixed(2)}`;
+            document.getElementById('bsRetained').innerText = `$${netProfit.toFixed(2)}`;
+            document.getElementById('bsTotalLiabEquity').innerText = `$${totalLiabEquity.toFixed(2)}`;
+ 
+            document.getElementById('cfOpCash').innerText = `$${comp.openingBalances.cash.toFixed(2)}`;
+            document.getElementById('cfSalesIn').innerText = `$${cashInSales.toFixed(2)}`;
+            document.getElementById('cfPurchasesOut').innerText = `-$${cashOutExpenses.toFixed(2)}`;
+            document.getElementById('cfPayrollOut').innerText = `-$${cashOutPayroll.toFixed(2)}`;
+            document.getElementById('cfTaxOut').innerText = `-$${cashOutTax.toFixed(2)}`;
+            document.getElementById('cfNetOperating').innerText = `$${netCashFromOps.toFixed(2)}`;
+            document.getElementById('cfAssetsOut').innerText = `-$${cashOutAssets.toFixed(2)}`;
+            document.getElementById('cfNetInvesting').innerText = `$${netCashFromInvesting.toFixed(2)}`;
+            document.getElementById('cfOwnerNet').innerText = `$${netOwnerEquityTransfers.toFixed(2)}`;
+            document.getElementById('cfNetFinancing').innerText = `$${netCashFromFinancing.toFixed(2)}`;
+            const cfNetEl = document.getElementById('cfNetCash');
+            cfNetEl.innerText = `$${currentCash.toFixed(2)}`;
+            cfNetEl.style.color = currentCash >= 0 ? 'var(--success)' : 'var(--danger)';
+ 
+            renderReconciliation();
+            renderReconHistory();
+        }
+ 
+        function renderAssetList() {
+            const tbody = document.querySelector('#assetListTable tbody');
+            tbody.innerHTML = '';
+            comp.fixedAssets.forEach(a => {
+                const bookVal = a.cost - a.accumDepr;
+                tbody.innerHTML += `<tr><td>${a.name}${a.disposed ? ' (Disposed)' : ''}</td><td>$${a.cost.toFixed(2)}</td><td>$${a.accumDepr.toFixed(2)}</td><td>$${bookVal.toFixed(2)}</td><td>${a.disposed ? '-' : `<button class="btn-action btn-delete" onclick="disposeAsset('${a.id}')">Dispose</button>`}</td></tr>`;
+            });
+        }
+ 
+        async function disposeAsset(assetId) {
+            const asset = comp.fixedAssets.find(a => a.id == assetId);
+            if (!asset) return;
+            const date = prompt("Disposal date (YYYY-MM-DD):", todayStr);
+            if (!date) return;
+            const proceeds = parseFloat(prompt("Sale proceeds received (enter 0 if scrapped with no value):", "0")) || 0;
+            const bookVal = asset.cost - asset.accumDepr;
+            const gainLoss = proceeds - bookVal;
+ 
+            await sb.from('fixed_assets').update({ disposed: true }).eq('id', assetId);
+            await sb.from('transactions').insert({
+                company_id: activeCompanyId, type: 'ASSET_DISPOSAL', date, party: asset.name,
+                item: `Disposal of asset (${gainLoss >= 0 ? 'Gain' : 'Loss'} $${Math.abs(gainLoss).toFixed(2)})`,
+                amount: proceeds, status: 'Paid'
+            });
+            const debits = [{ account: 'Cash / Bank', amount: proceeds }, { account: 'Accumulated Depreciation', amount: asset.accumDepr }];
+            const credits = [{ account: `Fixed Assets - ${asset.name}`, amount: asset.cost }];
+            if (gainLoss > 0) credits.push({ account: 'Gain on Disposal', amount: gainLoss });
+            if (gainLoss < 0) debits.push({ account: 'Loss on Disposal', amount: Math.abs(gainLoss) });
+            await addJournalEntry(date, `Disposed Fixed Asset: ${asset.name}`, debits, credits);
+            await logAudit('DISPOSE_ASSET', `${asset.name}, proceeds $${proceeds}`);
+            await reloadAndRender();
+            alert(`Asset disposed. ${gainLoss >= 0 ? 'Gain' : 'Loss'} of $${Math.abs(gainLoss).toFixed(2)} recorded.`);
+        }
+ 
+        async function markAsPaid(id) {
+            const t = comp.transactions.find(x => x.id == id);
+            if (!t) return;
+            const payDate = prompt("Enter payment date (YYYY-MM-DD):", todayStr);
+            if (!payDate) return;
+ 
+            if (t.type === 'SALE') {
+                const amountReceived = t.balanceDue;
+                await sb.from('transactions').update({ balance_due: 0, status: 'Paid' }).eq('id', id);
+                await addJournalEntry(payDate, `Payment Received for Invoice ${t.ref} (${t.party})`,
+                    [{ account: 'Cash / Bank', amount: amountReceived }], [{ account: `Accounts Receivable (${t.party})`, amount: amountReceived }]);
+            } else if (t.type === 'PURCHASE') {
+                const amountPaid = t.balanceDue;
+                await sb.from('transactions').update({ balance_due: 0, status: 'Paid' }).eq('id', id);
+                await addJournalEntry(payDate, `Paid Supplier Bill for ${t.party}`,
+                    [{ account: `Accounts Payable (${t.party})`, amount: amountPaid }], [{ account: 'Cash / Bank', amount: amountPaid }]);
+            }
+            await logAudit('MARK_PAID', `Transaction ${id}`);
+            await reloadAndRender();
+        }
+ 
+        async function deleteTransaction(id) {
+            if (!confirm("Are you sure you want to PERMANENTLY DELETE this transaction?")) return;
+            await sb.from('transactions').delete().eq('id', id);
+            await logAudit('DELETE_TRANSACTION', `Transaction ${id}`);
+            await reloadAndRender();
+        }
+ 
+        function editTransaction(id) {
+            const t = comp.transactions.find(x => x.id == id);
+            if (!t) return;
+            if (t.type === 'SALE') {
+                document.getElementById('editSaleId').value = t.id;
+                document.getElementById('saleDate').value = t.date;
+                document.getElementById('salePayment').value = t.method;
+                document.getElementById('customerName').value = t.party;
+                document.getElementById('itemSold').value = t.item;
+                document.getElementById('saleAmt').value = t.amount;
+                document.getElementById('saleTax').value = t.tax;
+                toggleSplitFields();
+                if (t.method === 'Split') document.getElementById('saleCashNow').value = t.paidNow;
+                document.getElementById('saleBtn').innerText = "💾 Update Sale / Invoice";
+            } else if (t.type === 'PURCHASE') {
+                document.getElementById('editPurchaseId').value = t.id;
+                document.getElementById('purchaseDate').value = t.date;
+                document.getElementById('expenseCategory').value = t.category;
+                document.getElementById('purchasePayment').value = t.method;
+                document.getElementById('vendorName').value = t.party;
+                document.getElementById('itemBought').value = t.item;
+                document.getElementById('purchaseAmt').value = t.amount;
+                document.getElementById('purchaseTax').value = t.tax;
+                togglePurchaseSplitFields();
+                if (t.method === 'Split') document.getElementById('purchaseCashNow').value = t.paidNow;
+                updateCategoryTypeHint();
+                document.getElementById('purchaseBtn').innerText = "💾 Update Expense";
+            }
+        }
+ 
+        async function remitTax(taxType) {
+            const date = prompt(`Enter ${taxType} Tax Remittance Payment Date:`, todayStr);
+            if (!date) return;
+            const amt = parseFloat(prompt(`Enter total ${taxType} Tax amount being remitted:`));
+            if (!amt || amt <= 0) return alert('Invalid amount');
+            await sb.from('transactions').insert({
+                company_id: activeCompanyId, type: 'TAX_REMITTANCE', tax_type: taxType, date,
+                party: taxType === 'Sales' ? 'State Tax Auth' : 'IRS / Payroll Auth',
+                item: `${taxType} Tax Payment Settlement`, amount: amt, status: 'Paid'
+            });
+            await addJournalEntry(date, `Remitted ${taxType} Tax Settlement`, [{ account: `${taxType} Tax Payable`, amount: amt }], [{ account: 'Cash / Bank', amount: amt }]);
+            await logAudit('REMIT_TAX', `${taxType} $${amt}`);
+            await reloadAndRender();
+            alert(`${taxType} Tax remittance recorded!`);
+        }
+ 
+        async function saveTaxDueDates() {
+            const sales = document.getElementById('salesTaxDueDate').value || null;
+            const payroll = document.getElementById('payrollTaxDueDate').value || null;
+            await sb.from('companies').update({ sales_tax_due_date: sales, payroll_tax_due_date: payroll }).eq('id', activeCompanyId);
+        }
+ 
+        document.getElementById('ownerEquityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const date = document.getElementById('equityDate').value;
+            const equityType = document.getElementById('equityType').value;
+            const amt = parseFloat(document.getElementById('equityAmt').value) || 0;
+            const memo = document.getElementById('equityMemo').value;
+            await sb.from('transactions').insert({ company_id: activeCompanyId, type: 'EQUITY', equity_type: equityType, date, party: 'Business Owner', item: memo, amount: amt, status: 'Paid' });
+            if (equityType === 'Contribution') await addJournalEntry(date, `Owner Equity Contribution: ${memo}`, [{ account: 'Cash / Bank', amount: amt }], [{ account: "Owner's Capital", amount: amt }]);
+            else await addJournalEntry(date, `Owner Draw / Withdrawal: ${memo}`, [{ account: "Owner's Draws / Equity", amount: amt }], [{ account: 'Cash / Bank', amount: amt }]);
+            await logAudit('OWNER_EQUITY', `${equityType} $${amt}`);
+            this.reset();
+            document.getElementById('equityDate').value = todayStr;
+            await reloadAndRender();
+        });
+ 
+        // ---- BANK RECONCILIATION ----
+        function renderReconciliation() {
+            const listEl = document.getElementById('reconTxnList');
+            const targetDate = document.getElementById('reconDate').value || todayStr;
+            const cashTxns = comp.transactions.filter(t => t.date <= targetDate && ['SALE','PURCHASE','PAYROLL','TAX_REMITTANCE','EQUITY','ASSET','ASSET_DISPOSAL'].includes(t.type));
+            listEl.innerHTML = '';
+            let outstandingTotal = 0;
+            cashTxns.forEach(t => {
+                const cleared = !!t.cleared;
+                const total = (t.amount || 0) + (t.tax || 0);
+                if (!cleared) outstandingTotal += total;
+                const row = document.createElement('div');
+                row.className = 'recon-row';
+                row.innerHTML = `<input type="checkbox" ${cleared ? 'checked' : ''} onchange="toggleCleared('${t.id}', this.checked)"><span>${t.date} — ${t.party} (${t.item}) — $${total.toFixed(2)}</span>`;
+                listEl.appendChild(row);
+            });
+            const bsCashText = document.getElementById('bsCash').innerText.replace('$', '').replace(',', '');
+            const bookBal = parseFloat(bsCashText) || 0;
+            const stmtBal = parseFloat(document.getElementById('statementBal').value) || 0;
+            const variance = (bookBal - outstandingTotal) - stmtBal;
+            document.getElementById('reconBookBal').innerText = `$${bookBal.toFixed(2)}`;
+            document.getElementById('reconStmtBal').innerText = `$${stmtBal.toFixed(2)}`;
+            document.getElementById('reconOutstanding').innerText = `$${outstandingTotal.toFixed(2)}`;
+            const varEl = document.getElementById('reconVariance');
+            varEl.innerText = `$${variance.toFixed(2)}`;
+            varEl.style.color = Math.abs(variance) < 0.01 ? 'var(--success)' : 'var(--danger)';
+        }
+ 
+        async function toggleCleared(txnId, isChecked) {
+            await sb.from('transactions').update({ cleared: isChecked }).eq('id', txnId);
+            const t = comp.transactions.find(x => x.id == txnId);
+            if (t) t.cleared = isChecked;
+            renderReconciliation();
+        }
+ 
+        async function saveReconciliationSnapshot() {
+            const date = document.getElementById('reconDate').value || todayStr;
+            const stmtBal = parseFloat(document.getElementById('statementBal').value) || 0;
+            const variance = document.getElementById('reconVariance').innerText;
+            await sb.from('reconciliations').insert({ company_id: activeCompanyId, date, statement_balance: stmtBal, variance });
+            await logAudit('SAVE_RECONCILIATION', `${date}, statement $${stmtBal}`);
+            await reloadAndRender();
+            alert('Reconciliation record saved!');
+        }
+ 
+        function renderReconHistory() {
+            const el = document.getElementById('reconHistoryList');
+            el.innerHTML = comp.reconciliations.slice().reverse().map(r => `<div>${r.date} — Statement $${r.stmtBal.toFixed(2)} — Variance ${r.variance}</div>`).join('') || '<div style="color:#94a3b8;">No saved reconciliations yet.</div>';
+        }
+ 
+        // ---- FIXED ASSETS ----
+        document.getElementById('assetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const date = document.getElementById('assetDate').value;
+            const name = document.getElementById('assetName').value;
+            const cost = parseFloat(document.getElementById('assetCost').value) || 0;
+            const salvage = parseFloat(document.getElementById('assetSalvage').value) || 0;
+            const life = parseInt(document.getElementById('assetLife').value) || 5;
+            if (life < 3 || life > 40) { if (!confirm(`Useful life of ${life} years is outside the typical 3–40 year range. Continue anyway?`)) return; }
+            if (salvage >= cost) return alert('Salvage value must be less than purchase cost.');
+ 
+            await sb.from('fixed_assets').insert({ company_id: activeCompanyId, name, date, cost, salvage, life, accum_depr: 0, disposed: false });
+            await sb.from('transactions').insert({ company_id: activeCompanyId, type: 'ASSET', date, party: name, item: `Capital Equipment Asset (${life} yr life)`, amount: cost, status: 'Paid' });
+            await addJournalEntry(date, `Capitalized Asset Purchase: ${name}`, [{ account: `Fixed Assets - ${name}`, amount: cost }], [{ account: 'Cash / Bank', amount: cost }]);
+            await logAudit('ADD_ASSET', `${name} $${cost}`);
+            this.reset();
+            document.getElementById('assetDate').value = todayStr;
+            document.getElementById('assetLife').value = 5;
+            await reloadAndRender();
+            alert('Fixed asset capitalized!');
+        });
+ 
+        async function processAnnualDepreciation() {
+            const active = comp.fixedAssets.filter(a => !a.disposed);
+            if (active.length === 0) return alert('No active fixed assets found to depreciate.');
+            let totalRun = 0;
+            const runDate = todayStr;
+            const updates = [];
+ 
+            active.forEach(a => {
+                const depreciableBase = a.cost - a.salvage;
+                const remaining = depreciableBase - a.accumDepr;
+                if (remaining <= 0) return;
+                let amountThisRun;
+                if (a.accumDepr === 0) {
+                    const acqDate = new Date(a.date);
+                    const yearEnd = new Date(acqDate.getFullYear(), 11, 31);
+                    const daysOwned = Math.max(1, Math.min(365, Math.ceil((yearEnd - acqDate) / (1000*60*60*24)) + 1));
+                    amountThisRun = Math.min(remaining, (depreciableBase / a.life) * (daysOwned / 365));
+                } else {
+                    amountThisRun = Math.min(remaining, depreciableBase / a.life);
+                }
+                updates.push({ id: a.id, newAccum: a.accumDepr + amountThisRun });
+                totalRun += amountThisRun;
+            });
+ 
+            if (totalRun <= 0) return alert('All active assets are already fully depreciated.');
+ 
+            for (const u of updates) { await sb.from('fixed_assets').update({ accum_depr: u.newAccum }).eq('id', u.id); }
+            await sb.from('transactions').insert({ company_id: activeCompanyId, type: 'DEPRECIATION', date: runDate, party: 'Internal Asset Depreciation', item: 'Straight-Line Depreciation Expense (prorated where applicable)', amount: totalRun, status: 'Paid' });
+            await addJournalEntry(runDate, 'Recorded Straight-Line Depreciation', [{ account: 'Depreciation Expense', amount: totalRun }], [{ account: 'Accumulated Depreciation', amount: totalRun }]);
+            await logAudit('RUN_DEPRECIATION', `$${totalRun.toFixed(2)} across ${updates.length} assets`);
+            await reloadAndRender();
+            alert(`Depreciation of $${totalRun.toFixed(2)} processed across ${updates.length} asset(s).`);
+        }
+ 
+        // ---- SALES ----
+        document.getElementById('salesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editSaleId').value;
+            const method = document.getElementById('salePayment').value;
+            const amt = parseFloat(document.getElementById('saleAmt').value) || 0;
+            const tax = parseFloat(document.getElementById('saleTax').value) || 0;
+            const party = document.getElementById('customerName').value;
+            const item = document.getElementById('itemSold').value;
+            const date = document.getElementById('saleDate').value;
+            const total = amt + tax;
+ 
+            let paidNow, balanceDue, status;
+            if (method === 'Invoice') { paidNow = 0; balanceDue = total; status = 'Unpaid'; }
+            else if (method === 'Split') {
+                paidNow = parseFloat(document.getElementById('saleCashNow').value) || 0;
+                if (paidNow <= 0 || paidNow >= total) return alert('For a split payment, "Cash Received Now" must be more than $0 and less than the total.');
+                balanceDue = total - paidNow; status = 'Partial';
+            } else { paidNow = total; balanceDue = 0; status = 'Paid'; }
+ 
+            if (editId) {
+                await sb.from('transactions').update({ date, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status }).eq('id', editId);
+                await logAudit('EDIT_SALE', `${party} $${amt}`);
+                document.getElementById('editSaleId').value = '';
+                document.getElementById('saleBtn').innerText = "+ Register Sale / Invoice";
+            } else {
+                const invNum = getNextInvoiceNum();
+                await sb.from('transactions').insert({ company_id: activeCompanyId, ref: invNum, type: 'SALE', category: 'Sales Revenue', date, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status });
+                await sb.from('companies').update({ invoice_counter: comp.invoiceCounter + 1 }).eq('id', activeCompanyId);
+                let credits = [{ account: 'Sales Revenue', amount: amt }];
+                if (tax > 0) credits.push({ account: 'Sales Tax Payable', amount: tax });
+                let debits = [];
+                if (paidNow > 0) debits.push({ account: `Cash / Bank (${method})`, amount: paidNow });
+                if (balanceDue > 0) debits.push({ account: `Accounts Receivable (${party})`, amount: balanceDue });
+                await addJournalEntry(date, `Invoice ${invNum} to ${party} (${item})`, debits, credits);
+                await logAudit('ADD_SALE', `${invNum} ${party} $${total}`);
+            }
+            this.reset();
+            document.getElementById('saleDate').value = todayStr;
+            document.getElementById('saleTax').value = 0;
+            toggleSplitFields();
+            await reloadAndRender();
+        });
+ 
+        // ---- EXPENSES / PURCHASES ----
+        document.getElementById('purchaseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editPurchaseId').value;
+            const category = document.getElementById('expenseCategory').value;
+            const method = document.getElementById('purchasePayment').value;
+            const amt = parseFloat(document.getElementById('purchaseAmt').value) || 0;
+            const tax = parseFloat(document.getElementById('purchaseTax').value) || 0;
+            const party = document.getElementById('vendorName').value;
+            const item = document.getElementById('itemBought').value;
+            const date = document.getElementById('purchaseDate').value;
+            const total = amt + tax;
+ 
+            const catObj = comp.categories.find(c => c.name === category);
+            const catType = catObj ? catObj.type : 'Expense';
+            const debitAccountName = catType === 'Inventory' ? 'Inventory (Asset)' : `${category} Expense`;
+ 
+            let paidNow, balanceDue, status;
+            if (method === 'Bill') { paidNow = 0; balanceDue = total; status = 'Unpaid'; }
+            else if (method === 'Split') {
+                paidNow = parseFloat(document.getElementById('purchaseCashNow').value) || 0;
+                if (paidNow <= 0 || paidNow >= total) return alert('For a split payment, "Cash Paid Now" must be more than $0 and less than the total.');
+                balanceDue = total - paidNow; status = 'Partial';
+            } else { paidNow = total; balanceDue = 0; status = 'Paid'; }
+ 
+            if (editId) {
+                await sb.from('transactions').update({ date, category, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status }).eq('id', editId);
+                await logAudit('EDIT_PURCHASE', `${party} $${amt}`);
+                document.getElementById('editPurchaseId').value = '';
+                document.getElementById('purchaseBtn').innerText = "+ Register Expense / Bill";
+            } else {
+                await sb.from('transactions').insert({ company_id: activeCompanyId, ref: 'EXP', type: 'PURCHASE', category, date, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status });
+                let credits = [];
+                if (paidNow > 0) credits.push({ account: `Cash / Bank (${method})`, amount: paidNow });
+                if (balanceDue > 0) credits.push({ account: `Accounts Payable (${party})`, amount: balanceDue });
+                let debits = [{ account: debitAccountName, amount: amt }];
+                if (tax > 0) debits.push({ account: 'Sales Tax Expense', amount: tax });
+                await addJournalEntry(date, `${catType === 'Inventory' ? 'Inventory Purchase' : 'Expense Bill'} to ${party} (${item})`, debits, credits);
+                await logAudit('ADD_PURCHASE', `${party} $${total}`);
+            }
+            this.reset();
+            document.getElementById('purchaseDate').value = todayStr;
+            togglePurchaseSplitFields();
+            await reloadAndRender();
+        });
+ 
+        // ---- PAYROLL ----
+        document.getElementById('payrollForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const periodStart = document.getElementById('payPeriodStart').value;
+            const periodEnd = document.getElementById('payPeriodEnd').value;
+            const date = document.getElementById('payDate').value;
+            const party = document.getElementById('empName').value;
+            const gross = parseFloat(document.getElementById('grossPay').value) || 0;
+            const tax = parseFloat(document.getElementById('taxWithheld').value) || 0;
+            const employerTax = parseFloat(document.getElementById('employerTax').value) || 0;
+            const method = document.getElementById('payMethod').value;
+            const net = gross - tax;
+ 
+            await sb.from('transactions').insert({ company_id: activeCompanyId, ref: 'PAY', type: 'PAYROLL', category: 'Payroll', date, period_start: periodStart, period_end: periodEnd, party, item: `Wages & Salary (${periodStart} to ${periodEnd})`, amount: net, gross, tax, employer_tax: employerTax, method, status: 'Paid' });
+ 
+            const debits = [{ account: 'Payroll Expense (Gross)', amount: gross }];
+            const credits = [{ account: `Cash / Bank (${method}) - Net Pay`, amount: net }, { account: 'Employee Tax Withholding Payable', amount: tax }];
+            if (employerTax > 0) { debits.push({ account: 'Employer Payroll Tax Expense', amount: employerTax }); credits.push({ account: 'Employer Payroll Tax Payable', amount: employerTax }); }
+            await addJournalEntry(date, `Payroll Payment for ${party} (Period ${periodStart} to ${periodEnd})`, debits, credits);
+            await logAudit('ADD_PAYROLL', `${party} gross $${gross}`);
+            this.reset();
+            document.getElementById('payDate').value = todayStr;
+            document.getElementById('payPeriodStart').value = todayStr;
+            document.getElementById('payPeriodEnd').value = todayStr;
+            document.getElementById('netPayDisplay').value = '';
+            await reloadAndRender();
+        });
+ 
+        document.getElementById('openingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const cash = parseFloat(document.getElementById('opCash').value) || 0;
+            const ar = parseFloat(document.getElementById('opAR').value) || 0;
+            const ap = parseFloat(document.getElementById('opAP').value) || 0;
+            const capital = parseFloat(document.getElementById('opCapital').value) || 0;
+            await sb.from('companies').update({ opening_cash: cash, opening_ar: ar, opening_ap: ap, opening_capital: capital }).eq('id', activeCompanyId);
+            await logAudit('SAVE_OPENING_BALANCES', `cash $${cash}, ar $${ar}, ap $${ap}, capital $${capital}`);
+            await reloadAndRender();
+            alert('Opening Balances saved!');
+        });
+ 
+        async function openManualJournalEntry() {
+            const date = prompt("Entry date (YYYY-MM-DD):", todayStr);
+            if (!date) return;
+            const memo = prompt("Memo / explanation for this entry:");
+            if (!memo) return;
+            const debitAcc = prompt("Debit account name:");
+            if (!debitAcc) return;
+            const debitAmt = parseFloat(prompt("Debit amount ($):"));
+            if (!debitAmt || debitAmt <= 0) return alert('Invalid debit amount.');
+            const creditAcc = prompt("Credit account name:");
+            if (!creditAcc) return;
+            const creditAmt = parseFloat(prompt("Credit amount ($):"));
+            if (!creditAmt || creditAmt <= 0) return alert('Invalid credit amount.');
+            if (Math.abs(debitAmt - creditAmt) > 0.01) return alert(`Entry does not balance: Debit $${debitAmt.toFixed(2)} ≠ Credit $${creditAmt.toFixed(2)}. Manual entries must balance.`);
+            await addJournalEntry(date, `[Manual Adjusting Entry] ${memo}`, [{ account: debitAcc, amount: debitAmt }], [{ account: creditAcc, amount: creditAmt }]);
+            await logAudit('MANUAL_JOURNAL_ENTRY', memo);
+            await reloadAndRender();
+            alert('Manual journal entry recorded.');
+        }
+ 
+        function clearDateFilter() {
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            renderDashboard();
+        }
+ 
+        function printCard(cardId) {
+            const card = document.getElementById(cardId);
+            card.classList.add('printable-section');
+            window.print();
+            card.classList.remove('printable-section');
+        }
+ 
+        document.getElementById('grossPay').addEventListener('input', updateNetPay);
+        document.getElementById('taxWithheld').addEventListener('input', updateNetPay);
+        function updateNetPay() {
+            const gross = parseFloat(document.getElementById('grossPay').value) || 0;
+            const tax = parseFloat(document.getElementById('taxWithheld').value) || 0;
+            document.getElementById('netPayDisplay').value = (gross - tax).toFixed(2);
+        }
+ 
+        // Initialize date fields
+        ['saleDate','purchaseDate','payDate','payPeriodStart','payPeriodEnd','equityDate','assetDate','reconDate'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = todayStr;
+        });
+    </script>
+</body>
+</html>
+ 
