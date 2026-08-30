@@ -71,7 +71,7 @@
             .btn-print, .top-actions, .company-bar, .filter-banner { display: none !important; }
             .print-company-header { display: block !important; }
         }
- 
+
         /* AUTH SCREEN */
         #authOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background:#0f172a; display:flex; align-items:center; justify-content:center; z-index: 2000; }
         .auth-box { background:white; border-radius: 14px; padding: 30px; width: 360px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -87,7 +87,7 @@
     </style>
 </head>
 <body>
- 
+
     <!-- AUTH GATE -->
     <div id="authOverlay">
         <div class="auth-box">
@@ -110,9 +110,9 @@
             <div id="authLoading" style="display:none;">Working on it...</div>
         </div>
     </div>
- 
+
     <div id="appRoot" class="app-hidden">
- 
+
     <div class="company-bar">
         <div class="company-bar-left">
             <label for="companySelect">🏢 ACTIVE CLIENT / ENTITY:</label>
@@ -124,7 +124,7 @@
             <button class="btn-action" style="background:#475569; width:auto;" onclick="signOut()">🚪 Sign Out</button>
         </div>
     </div>
- 
+
     <div class="header-bar">
         <div>
             <h1>💼 Multi-Entity Business Ledger ERP</h1>
@@ -135,7 +135,7 @@
             <button class="btn-delete btn-action" onclick="deleteCurrentCompany()">🗑️ Delete Company</button>
         </div>
     </div>
- 
+
     <div class="filter-banner">
         <div>
             <strong>📅 Active Reporting Date Range Filter:</strong>
@@ -145,11 +145,11 @@
         </div>
         <button class="btn-primary btn-action" onclick="clearDateFilter()">Clear Range Filter</button>
     </div>
- 
+
     <div id="loadingBanner" style="text-align:center; padding: 20px; color:#64748b;">Loading your data...</div>
- 
+
     <div class="dashboard-grid" id="dashboardGrid" style="display:none;">
- 
+
         <div class="square-card" style="border-top: 4px solid var(--info);">
             <h2 style="color: var(--info);">0. Opening Balances</h2>
             <form id="openingForm">
@@ -164,7 +164,7 @@
                 <button type="submit" class="btn-info">💾 Save Opening Balances</button>
             </form>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--teal);">
             <h2 style="color: var(--teal);">0B. Owner Capital & Equity Draws</h2>
             <form id="ownerEquityForm">
@@ -182,7 +182,7 @@
                 <button type="submit" class="btn-teal">+ Record Owner Equity Transfer</button>
             </form>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--success);">
             <h2 style="color: var(--success);">1. Sales / Revenue (+ IN)</h2>
             <form id="salesForm">
@@ -213,7 +213,7 @@
                 <button type="submit" class="btn-sale" id="saleBtn">+ Register Sale / Invoice</button>
             </form>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--danger);">
             <h2 style="color: var(--danger);">2. Expenses & Bills (- OUT)</h2>
             <form id="purchaseForm">
@@ -245,7 +245,7 @@
                 <button type="submit" class="btn-purchase" id="purchaseBtn">+ Register Expense / Bill</button>
             </form>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--purple);">
             <h2 style="color: var(--purple);">3. Payroll & Wages</h2>
             <form id="payrollForm">
@@ -271,7 +271,7 @@
                 <button type="submit" class="btn-payroll">+ Process Payroll</button>
             </form>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid #475569;">
             <h2 style="color: #475569;">3B. Fixed Assets & Depreciation</h2>
             <form id="assetForm">
@@ -293,7 +293,7 @@
                 <table class="asset-row-table" id="assetListTable"><thead><tr><th>Asset</th><th>Cost</th><th>Accum. Depr.</th><th>Book Value</th><th>Action</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
- 
+
         <div class="square-card" style="grid-column: span 1;">
             <h2>Central Transaction Log</h2>
             <div class="search-box"><input type="text" id="txnSearch" placeholder="🔍 Search by party, item, or description..." oninput="renderDashboard()"></div>
@@ -301,14 +301,14 @@
                 <table id="txnTable"><thead><tr><th>Date</th><th>Ref / Party / Item</th><th>Total ($)</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
- 
+
         <div class="square-card">
             <h2 style="color: var(--warning);">Accounts Receivable Aging</h2>
             <div style="max-height: 320px; overflow-y: auto;">
                 <table id="agingTable"><thead><tr><th>Inv # / Customer</th><th>Amount ($)</th><th>Age</th><th>Bucket</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--warning);">
             <h2 style="color: var(--warning);">Tax Payables & Settlements</h2>
             <table>
@@ -324,7 +324,7 @@
                 <div style="max-height:100px; overflow-y:auto;"><table id="remittanceHistoryTable"><thead><tr><th>Date</th><th>Type</th><th>Amount</th></tr></thead><tbody></tbody></table></div>
             </div>
         </div>
- 
+
         <div class="square-card" style="border-top: 4px solid var(--primary);">
             <h2 style="color: var(--primary);">Bank Reconciliation</h2>
             <div class="form-group"><label>Target Bank Statement Ending Date</label><input type="date" id="reconDate" onchange="renderReconciliation()"></div>
@@ -341,7 +341,7 @@
             <button class="btn-primary" style="margin-top:8px;" onclick="saveReconciliationSnapshot()">💾 Save Reconciliation Record</button>
             <div style="margin-top:8px;"><label>Past Reconciliations</label><div id="reconHistoryList" style="font-size:10px; max-height:80px; overflow-y:auto;"></div></div>
         </div>
- 
+
         <div class="square-card">
             <h2>Chart of Accounts Editor</h2>
             <div class="form-row">
@@ -362,14 +362,14 @@
                 <table id="coaTable"><thead><tr><th>#</th><th>Category</th><th>Type</th><th>Actions</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
- 
+
         <div class="square-card" style="grid-column: span 1;">
             <h2><span>General Journal</span><button class="btn-print" style="margin:0;" onclick="openManualJournalEntry()">+ Manual Entry</button></h2>
             <div style="max-height: 280px; overflow-y: auto;">
                 <table id="journalTable"><thead><tr><th>Account Name & Explanation</th><th>Debit ($)</th><th>Credit ($)</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
- 
+
         <div class="square-card" id="incStmtCard">
             <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Income Statement (P&L Report)</p></div>
             <h2><span>Income Statement (P&L)</span><button class="btn-print" onclick="printCard('incStmtCard')">🖨️ Print</button></h2>
@@ -382,7 +382,7 @@
                 <tr style="font-weight: bold; font-size: 13px; border-top: 2px solid #000;"><td>Net Operating Income:</td><td id="incNetProfit">$0.00</td></tr>
             </table>
         </div>
- 
+
         <div class="square-card" id="balSheetCard">
             <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Balance Sheet Financial Statement</p></div>
             <h2><span>Balance Sheet</span><button class="btn-print" onclick="printCard('balSheetCard')">🖨️ Print</button></h2>
@@ -407,7 +407,7 @@
                 <tr style="font-weight: bold;"><td>Total Liabilities & Equity:</td><td id="bsTotalLiabEquity">$0.00</td></tr>
             </table>
         </div>
- 
+
         <div class="square-card" id="cashFlowCard">
             <div class="print-company-header"><h2 class="printCompName">Company Name</h2><p><span class="printCompIndustry">Industry</span> | Cash Flow Statement</p></div>
             <h2><span>Cash Flow Statement</span><button class="btn-print" onclick="printCard('cashFlowCard')">🖨️ Print</button></h2>
@@ -429,10 +429,10 @@
                 <tr style="font-weight: bold; border-top: 2px solid #000;"><td>Ending Cash Balance:</td><td id="cfNetCash">$0.00</td></tr>
             </table>
         </div>
- 
+
     </div>
     </div><!-- /appRoot -->
- 
+
     <div class="modal-overlay" id="newCompanyModal">
         <div class="modal">
             <h2 style="margin-top:0; border-bottom:1px solid #cbd5e1; padding-bottom:8px;">🏢 Create New Client / Company</h2>
@@ -447,7 +447,7 @@
             </form>
         </div>
     </div>
- 
+
     <script>
         // ============================================================
         // SUPABASE CONNECTION
@@ -456,13 +456,13 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpranpnYXhicHVmdGZ1c2hoaXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MDk0MDIsImV4cCI6MjEwMzI4NTQwMn0.bJkQJxjmmB62QBaGK3ArXcXKotg8u2Y3duYdd9Q6XWI";
         const { createClient } = supabase;
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
- 
+
         const todayStr = new Date().toISOString().split('T')[0];
         let currentUser = null;
         let companiesList = [];
         let activeCompanyId = null;
         let comp = null; // in-memory mirror of the active company's data
- 
+
         function defaultCategories() {
             return [
                 { name: "Cost of Goods", type: "Expense", account_num: 5010 },
@@ -474,7 +474,7 @@
                 { name: "General Expense", type: "Expense", account_num: 5090 }
             ];
         }
- 
+
         // ============================================================
         // AUTH UI
         // ============================================================
@@ -486,7 +486,7 @@
             document.getElementById('authSubmitBtn').innerText = mode === 'signin' ? 'Sign In' : 'Create Account';
             document.getElementById('authError').innerText = '';
         }
- 
+
         async function submitAuth() {
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
@@ -495,7 +495,7 @@
             if (!email || !password) { errEl.innerText = 'Enter both email and password.'; return; }
             document.getElementById('authLoading').style.display = 'block';
             document.getElementById('authSubmitBtn').disabled = true;
- 
+
             try {
                 let result;
                 if (authMode === 'signup') {
@@ -521,12 +521,12 @@
                 document.getElementById('authSubmitBtn').disabled = false;
             }
         }
- 
+
         async function signOut() {
             if (!confirm('Sign out?')) return;
             await sb.auth.signOut();
         }
- 
+
         sb.auth.onAuthStateChange((event, session) => {
             if (session && session.user) {
                 currentUser = session.user;
@@ -542,7 +542,7 @@
                 document.getElementById('authSubmitBtn').disabled = false;
             }
         });
- 
+
         // ============================================================
         // COMPANY LOADING
         // ============================================================
@@ -550,19 +550,19 @@
             const { data, error } = await sb.from('companies').select('*').order('created_at', { ascending: true });
             if (error) { alert('Error loading companies: ' + error.message); return; }
             companiesList = data;
- 
+
             if (companiesList.length === 0) {
                 await createCompanyRow('My Business', 'General', todayStr, true);
                 return; // createCompanyRow will re-call loadCompaniesForUser
             }
- 
+
             if (!activeCompanyId || !companiesList.some(c => c.id === activeCompanyId)) {
                 activeCompanyId = companiesList[0].id;
             }
             renderCompanyDropdown();
             await loadActiveCompanyData();
         }
- 
+
         function renderCompanyDropdown() {
             const select = document.getElementById('companySelect');
             select.innerHTML = '';
@@ -574,12 +574,12 @@
                 select.appendChild(opt);
             });
         }
- 
+
         async function switchCompany(companyId) {
             activeCompanyId = companyId;
             await loadActiveCompanyData();
         }
- 
+
         async function createCompanyRow(name, industry, startDate, isFirst) {
             const { data, error } = await sb.from('companies').insert({
                 owner_id: currentUser.id, name, industry, start_date: startDate,
@@ -587,21 +587,21 @@
                 invoice_counter: 1001, journal_ref_counter: 1
             }).select().single();
             if (error) { alert('Error creating company: ' + error.message); return; }
- 
+
             const catRows = defaultCategories().map(c => ({ ...c, company_id: data.id }));
             await sb.from('categories').insert(catRows);
- 
+
             activeCompanyId = data.id;
             await loadCompaniesForUser();
         }
- 
+
         async function loadActiveCompanyData() {
             document.getElementById('loadingBanner').style.display = 'block';
             document.getElementById('dashboardGrid').style.display = 'none';
- 
+
             const companyRow = companiesList.find(c => c.id === activeCompanyId);
             if (!companyRow) return;
- 
+
             const [catsRes, txnsRes, assetsRes, journalRes, reconRes] = await Promise.all([
                 sb.from('categories').select('*').eq('company_id', activeCompanyId),
                 sb.from('transactions').select('*').eq('company_id', activeCompanyId).order('date', { ascending: true }),
@@ -609,7 +609,7 @@
                 sb.from('journal_entries').select('*').eq('company_id', activeCompanyId).order('date', { ascending: true }),
                 sb.from('reconciliations').select('*').eq('company_id', activeCompanyId).order('saved_at', { ascending: true })
             ]);
- 
+
             comp = {
                 id: companyRow.id,
                 name: companyRow.name,
@@ -640,25 +640,25 @@
                 journalEntries: (journalRes.data || []).map(j => ({ id: j.id, ref: j.ref, date: j.date, memo: j.memo, debits: j.debits, credits: j.credits })),
                 reconciliations: (reconRes.data || []).map(r => ({ date: r.date, stmtBal: parseFloat(r.statement_balance) || 0, variance: r.variance }))
             };
- 
+
             document.getElementById('loadingBanner').style.display = 'none';
             document.getElementById('dashboardGrid').style.display = 'grid';
             renderDashboard();
         }
- 
+
         async function reloadAndRender() {
             // refresh companies (for opening balances / counters) + active company data
             const { data } = await sb.from('companies').select('*').order('created_at', { ascending: true });
             if (data) companiesList = data;
             await loadActiveCompanyData();
         }
- 
+
         function openNewCompanyModal() {
             document.getElementById('newCompStartDate').value = todayStr;
             document.getElementById('newCompanyModal').style.display = 'flex';
         }
         function closeNewCompanyModal() { document.getElementById('newCompanyModal').style.display = 'none'; }
- 
+
         document.getElementById('newCompanyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('newCompName').value.trim();
@@ -668,7 +668,7 @@
             this.reset();
             await createCompanyRow(name, industry, startDate, false);
         });
- 
+
         async function deleteCurrentCompany() {
             if (companiesList.length <= 1) return alert('Cannot delete the only remaining company in your workspace.');
             const companyRow = companiesList.find(c => c.id === activeCompanyId);
@@ -678,7 +678,7 @@
             activeCompanyId = null;
             await loadCompaniesForUser();
         }
- 
+
         function exportData() {
             const backupData = { mode: 'single_company', company: comp, exportedAt: new Date().toISOString() };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -689,21 +689,21 @@
             dlAnchor.click();
             dlAnchor.remove();
         }
- 
+
         async function logAudit(action, details) {
             try {
                 await sb.from('audit_log').insert({ company_id: activeCompanyId, user_id: currentUser.id, user_email: currentUser.email, action, details });
             } catch (e) { /* audit logging failures should never block the user's work */ }
         }
- 
+
         async function addJournalEntry(date, memo, debits, credits) {
             const ref = `JE-${String(comp.journalRefCounter).padStart(4, '0')}`;
             await sb.from('journal_entries').insert({ company_id: activeCompanyId, ref, date, memo, debits, credits });
             await sb.from('companies').update({ journal_ref_counter: comp.journalRefCounter + 1 }).eq('id', activeCompanyId);
         }
- 
+
         function getNextInvoiceNum() { return `INV-${comp.invoiceCounter}`; }
- 
+
         function populateCategoryDropdowns() {
             const sel = document.getElementById('expenseCategory');
             const prevVal = sel.value;
@@ -713,7 +713,7 @@
             });
             if (prevVal) sel.value = prevVal;
             updateCategoryTypeHint();
- 
+
             const coaBody = document.querySelector('#coaTable tbody');
             coaBody.innerHTML = '';
             comp.categories.slice().sort((a,b) => a.num - b.num).forEach(c => {
@@ -726,14 +726,14 @@
                 </tr>`;
             });
         }
- 
+
         document.getElementById('expenseCategory').addEventListener('change', updateCategoryTypeHint);
         function updateCategoryTypeHint() {
             const sel = document.getElementById('expenseCategory');
             const cat = comp.categories.find(c => c.name === sel.value);
             document.getElementById('categoryTypeHint').innerText = (cat && cat.type === 'Inventory') ? "This posts to Inventory (Asset) — not an immediate expense." : "";
         }
- 
+
         async function addNewCategory() {
             const name = document.getElementById('newCatName').value.trim();
             const type = document.getElementById('newCatType').value;
@@ -747,7 +747,7 @@
             document.getElementById('newCatName').value = '';
             await reloadAndRender();
         }
- 
+
         async function editCategory(catId) {
             const cat = comp.categories.find(c => c.id === catId);
             if (!cat) return;
@@ -756,7 +756,7 @@
             await sb.from('categories').update({ name: newName.trim() }).eq('id', catId);
             await reloadAndRender();
         }
- 
+
         async function deleteCategory(catId) {
             const cat = comp.categories.find(c => c.id === catId);
             if (!cat) return;
@@ -767,7 +767,7 @@
             await sb.from('categories').delete().eq('id', catId);
             await reloadAndRender();
         }
- 
+
         function toggleSplitFields() {
             const method = document.getElementById('salePayment').value;
             document.getElementById('splitFieldsRow').style.display = method === 'Split' ? 'flex' : 'none';
@@ -790,7 +790,7 @@
             const cashNow = parseFloat(document.getElementById('purchaseCashNow').value) || 0;
             document.getElementById('purchaseOwed').value = Math.max(0, (amt + tax) - cashNow).toFixed(2);
         }
- 
+
         // ============================================================
         // MAIN RENDER (operates on the in-memory `comp` mirror)
         // ============================================================
@@ -803,26 +803,26 @@
             document.querySelectorAll('.printCompIndustry').forEach(el => el.innerText = comp.industry || '');
             document.getElementById('salesTaxDueDate').value = comp.taxDueDates.sales || '';
             document.getElementById('payrollTaxDueDate').value = comp.taxDueDates.payroll || '';
- 
+
             document.getElementById('opCash').value = comp.openingBalances.cash;
             document.getElementById('opAR').value = comp.openingBalances.ar;
             document.getElementById('opAP').value = comp.openingBalances.ap;
             document.getElementById('opCapital').value = comp.openingBalances.capital;
- 
+
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
             const searchTerm = (document.getElementById('txnSearch').value || '').toLowerCase();
- 
+
             document.getElementById('incDateHeader').innerText = (startDate || endDate) ? `For the period ${startDate || '…'} to ${endDate || '…'}` : `For the period ended ${todayStr}`;
             document.getElementById('cfDateHeader').innerText = (startDate || endDate) ? `For the period ${startDate || '…'} to ${endDate || '…'}` : `For the period ended ${todayStr}`;
             document.getElementById('bsDateHeader').innerText = `As of ${endDate || todayStr}`;
- 
+
             const filteredTxns = comp.transactions.filter(t => {
                 if (startDate && t.date < startDate) return false;
                 if (endDate && t.date > endDate) return false;
                 return true;
             });
- 
+
             const tbody = document.querySelector('#txnTable tbody');
             tbody.innerHTML = '';
             comp.transactions.slice().reverse()
@@ -832,7 +832,7 @@
                     return hay.includes(searchTerm);
                 })
                 .forEach(t => {
-                    const total = (t.amount || 0) + (t.tax || 0);
+                    const total = t.type === 'ASSET_DISPOSAL' ? (t.amount || 0) : (t.amount || 0) + (t.tax || 0);
                     const tr = document.createElement('tr');
                     let actions = '';
                     if (t.status === 'Unpaid' || t.status === 'Partial') actions += `<button class="btn-action btn-pay" onclick="markAsPaid('${t.id}')">Pay</button> `;
@@ -841,7 +841,7 @@
                     tr.innerHTML = `<td>${t.date}</td><td><b>${t.ref || t.party}</b><br><small>${t.party} - ${t.item} (${t.type})</small></td><td><b>$${total.toFixed(2)}</b></td><td class="status-${(t.status||'').toLowerCase()}">${t.status}</td><td>${actions}</td>`;
                     tbody.appendChild(tr);
                 });
- 
+
             let totalSales = 0, salesTaxCollected = 0, payrollTaxWithheld = 0, employerTaxAccrued = 0;
             let salesTaxRemitted = 0, payrollTaxRemitted = 0;
             let catExpenses = {};
@@ -850,7 +850,8 @@
             let unpaidInvoicesAR = 0, unpaidBillsAP = 0;
             let cashInSales = 0, cashOutExpenses = 0, cashOutPayroll = 0, cashOutTax = 0, cashOutAssets = 0;
             let totalContributions = 0, totalDraws = 0;
- 
+            let periodDeprExpense = 0, disposalGainLoss = 0;
+
             filteredTxns.forEach(t => {
                 const total = (t.amount || 0) + (t.tax || 0);
                 if (t.type === 'SALE') {
@@ -888,15 +889,18 @@
                 } else if (t.type === 'ASSET') {
                     cashOutAssets += t.amount;
                 } else if (t.type === 'ASSET_DISPOSAL') {
-                    cashInSales += t.amount;
+                    cashOutAssets -= t.amount;
+                    disposalGainLoss += (t.tax || 0);
+                } else if (t.type === 'DEPRECIATION') {
+                    periodDeprExpense += t.amount;
                 }
             });
- 
+
             const netOwnerEquityTransfers = totalContributions - totalDraws;
             let fixedAssetsCost = 0, totalDepreciation = 0;
             comp.fixedAssets.filter(a => !a.disposed).forEach(a => { fixedAssetsCost += a.cost; totalDepreciation += a.accumDepr; });
             renderAssetList();
- 
+
             const agingBody = document.querySelector('#agingTable tbody');
             agingBody.innerHTML = '';
             const todayDate = new Date();
@@ -909,19 +913,19 @@
                 else if (diffDays > 30) { badgeClass = 'badge-30'; bucket = '31-60 Days'; }
                 agingBody.innerHTML += `<tr><td><b>${t.ref}</b><br><small>${t.party}</small></td><td>$${t.balanceDue.toFixed(2)}</td><td>${diffDays} days</td><td><span class="badge ${badgeClass}">${bucket}</span></td></tr>`;
             });
- 
+
             const netSalesTaxPayable = salesTaxCollected - salesTaxRemitted;
             const netPayrollTaxPayable = payrollTaxWithheld - payrollTaxRemitted;
             document.getElementById('lblSalesTaxPayable').innerText = `$${netSalesTaxPayable.toFixed(2)}`;
             document.getElementById('lblPayrollTaxPayable').innerText = `$${netPayrollTaxPayable.toFixed(2)}`;
             document.getElementById('lblEmployerTaxPayable').innerText = `$${employerTaxAccrued.toFixed(2)}`;
- 
+
             const remitBody = document.querySelector('#remittanceHistoryTable tbody');
             remitBody.innerHTML = '';
             comp.transactions.filter(t => t.type === 'TAX_REMITTANCE').slice().reverse().forEach(t => {
                 remitBody.innerHTML += `<tr><td>${t.date}</td><td>${t.taxType}</td><td>$${t.amount.toFixed(2)}</td></tr>`;
             });
- 
+
             const jbody = document.querySelector('#journalTable tbody');
             jbody.innerHTML = '';
             comp.journalEntries.slice().reverse().forEach(j => {
@@ -929,7 +933,7 @@
                 (j.debits||[]).forEach(d => jbody.innerHTML += `<tr><td>${d.account}</td><td>$${d.amount.toFixed(2)}</td><td>-</td></tr>`);
                 (j.credits||[]).forEach(c => jbody.innerHTML += `<tr><td class="indent">${c.account}</td><td>-</td><td>$${c.amount.toFixed(2)}</td></tr>`);
             });
- 
+
             const incExpBody = document.getElementById('incExpensesBody');
             incExpBody.innerHTML = '';
             let totalOperatingExp = 0;
@@ -937,13 +941,20 @@
                 const amt = catExpenses[cat];
                 if (amt > 0) { totalOperatingExp += amt; incExpBody.innerHTML += `<tr><td class="indent">${cat}:</td><td>$${amt.toFixed(2)}</td></tr>`; }
             });
-            document.getElementById('incDepr').innerText = `$${totalDepreciation.toFixed(2)}`;
-            const netProfit = totalSales - totalOperatingExp - totalDepreciation;
+            if (employerTaxAccrued > 0) {
+                totalOperatingExp += employerTaxAccrued;
+                incExpBody.innerHTML += `<tr><td class="indent">Employer Payroll Tax:</td><td>$${employerTaxAccrued.toFixed(2)}</td></tr>`;
+            }
+            if (disposalGainLoss !== 0) {
+                incExpBody.innerHTML += `<tr><td class="indent">${disposalGainLoss >= 0 ? 'Gain' : 'Loss'} on Asset Disposal:</td><td>${disposalGainLoss < 0 ? '-' : ''}$${Math.abs(disposalGainLoss).toFixed(2)}</td></tr>`;
+            }
+            document.getElementById('incDepr').innerText = `$${periodDeprExpense.toFixed(2)}`;
+            const netProfit = totalSales - totalOperatingExp - periodDeprExpense + disposalGainLoss;
             document.getElementById('incSales').innerText = `$${totalSales.toFixed(2)}`;
             const incNetEl = document.getElementById('incNetProfit');
             incNetEl.innerText = `$${netProfit.toFixed(2)}`;
             incNetEl.style.color = netProfit >= 0 ? 'var(--success)' : 'var(--danger)';
- 
+
             const netCashFromOps = cashInSales - cashOutExpenses - cashOutPayroll - cashOutTax;
             const netCashFromFinancing = netOwnerEquityTransfers;
             const netCashFromInvesting = -cashOutAssets;
@@ -953,7 +964,7 @@
             const totalAssets = currentCash + currentAR + inventoryAssetTotal + (fixedAssetsCost - totalDepreciation);
             const endingOwnerCapital = comp.openingBalances.capital + netOwnerEquityTransfers;
             const totalLiabEquity = currentAP + netSalesTaxPayable + netPayrollTaxPayable + employerTaxAccrued + endingOwnerCapital + netProfit;
- 
+
             document.getElementById('bsCash').innerText = `$${currentCash.toFixed(2)}`;
             document.getElementById('bsAR').innerText = `$${currentAR.toFixed(2)}`;
             document.getElementById('bsInventory').innerText = `$${inventoryAssetTotal.toFixed(2)}`;
@@ -969,7 +980,7 @@
             document.getElementById('bsOpeningCapital').innerText = `$${comp.openingBalances.capital.toFixed(2)}`;
             document.getElementById('bsRetained').innerText = `$${netProfit.toFixed(2)}`;
             document.getElementById('bsTotalLiabEquity').innerText = `$${totalLiabEquity.toFixed(2)}`;
- 
+
             document.getElementById('cfOpCash').innerText = `$${comp.openingBalances.cash.toFixed(2)}`;
             document.getElementById('cfSalesIn').innerText = `$${cashInSales.toFixed(2)}`;
             document.getElementById('cfPurchasesOut').innerText = `-$${cashOutExpenses.toFixed(2)}`;
@@ -983,11 +994,11 @@
             const cfNetEl = document.getElementById('cfNetCash');
             cfNetEl.innerText = `$${currentCash.toFixed(2)}`;
             cfNetEl.style.color = currentCash >= 0 ? 'var(--success)' : 'var(--danger)';
- 
+
             renderReconciliation();
             renderReconHistory();
         }
- 
+
         function renderAssetList() {
             const tbody = document.querySelector('#assetListTable tbody');
             tbody.innerHTML = '';
@@ -996,7 +1007,7 @@
                 tbody.innerHTML += `<tr><td>${a.name}${a.disposed ? ' (Disposed)' : ''}</td><td>$${a.cost.toFixed(2)}</td><td>$${a.accumDepr.toFixed(2)}</td><td>$${bookVal.toFixed(2)}</td><td>${a.disposed ? '-' : `<button class="btn-action btn-delete" onclick="disposeAsset('${a.id}')">Dispose</button>`}</td></tr>`;
             });
         }
- 
+
         async function disposeAsset(assetId) {
             const asset = comp.fixedAssets.find(a => a.id == assetId);
             if (!asset) return;
@@ -1005,12 +1016,12 @@
             const proceeds = parseFloat(prompt("Sale proceeds received (enter 0 if scrapped with no value):", "0")) || 0;
             const bookVal = asset.cost - asset.accumDepr;
             const gainLoss = proceeds - bookVal;
- 
+
             await sb.from('fixed_assets').update({ disposed: true }).eq('id', assetId);
             await sb.from('transactions').insert({
                 company_id: activeCompanyId, type: 'ASSET_DISPOSAL', date, party: asset.name,
                 item: `Disposal of asset (${gainLoss >= 0 ? 'Gain' : 'Loss'} $${Math.abs(gainLoss).toFixed(2)})`,
-                amount: proceeds, status: 'Paid'
+                amount: proceeds, tax: gainLoss, status: 'Paid'
             });
             const debits = [{ account: 'Cash / Bank', amount: proceeds }, { account: 'Accumulated Depreciation', amount: asset.accumDepr }];
             const credits = [{ account: `Fixed Assets - ${asset.name}`, amount: asset.cost }];
@@ -1021,13 +1032,13 @@
             await reloadAndRender();
             alert(`Asset disposed. ${gainLoss >= 0 ? 'Gain' : 'Loss'} of $${Math.abs(gainLoss).toFixed(2)} recorded.`);
         }
- 
+
         async function markAsPaid(id) {
             const t = comp.transactions.find(x => x.id == id);
             if (!t) return;
             const payDate = prompt("Enter payment date (YYYY-MM-DD):", todayStr);
             if (!payDate) return;
- 
+
             if (t.type === 'SALE') {
                 const amountReceived = t.balanceDue;
                 await sb.from('transactions').update({ balance_due: 0, status: 'Paid' }).eq('id', id);
@@ -1042,14 +1053,14 @@
             await logAudit('MARK_PAID', `Transaction ${id}`);
             await reloadAndRender();
         }
- 
+
         async function deleteTransaction(id) {
             if (!confirm("Are you sure you want to PERMANENTLY DELETE this transaction?")) return;
             await sb.from('transactions').delete().eq('id', id);
             await logAudit('DELETE_TRANSACTION', `Transaction ${id}`);
             await reloadAndRender();
         }
- 
+
         function editTransaction(id) {
             const t = comp.transactions.find(x => x.id == id);
             if (!t) return;
@@ -1079,7 +1090,7 @@
                 document.getElementById('purchaseBtn').innerText = "💾 Update Expense";
             }
         }
- 
+
         async function remitTax(taxType) {
             const date = prompt(`Enter ${taxType} Tax Remittance Payment Date:`, todayStr);
             if (!date) return;
@@ -1095,13 +1106,13 @@
             await reloadAndRender();
             alert(`${taxType} Tax remittance recorded!`);
         }
- 
+
         async function saveTaxDueDates() {
             const sales = document.getElementById('salesTaxDueDate').value || null;
             const payroll = document.getElementById('payrollTaxDueDate').value || null;
             await sb.from('companies').update({ sales_tax_due_date: sales, payroll_tax_due_date: payroll }).eq('id', activeCompanyId);
         }
- 
+
         document.getElementById('ownerEquityForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const date = document.getElementById('equityDate').value;
@@ -1116,7 +1127,7 @@
             document.getElementById('equityDate').value = todayStr;
             await reloadAndRender();
         });
- 
+
         // ---- BANK RECONCILIATION ----
         function renderReconciliation() {
             const listEl = document.getElementById('reconTxnList');
@@ -1126,7 +1137,7 @@
             let outstandingTotal = 0;
             cashTxns.forEach(t => {
                 const cleared = !!t.cleared;
-                const total = (t.amount || 0) + (t.tax || 0);
+                const total = t.type === 'ASSET_DISPOSAL' ? (t.amount || 0) : (t.amount || 0) + (t.tax || 0);
                 if (!cleared) outstandingTotal += total;
                 const row = document.createElement('div');
                 row.className = 'recon-row';
@@ -1144,14 +1155,14 @@
             varEl.innerText = `$${variance.toFixed(2)}`;
             varEl.style.color = Math.abs(variance) < 0.01 ? 'var(--success)' : 'var(--danger)';
         }
- 
+
         async function toggleCleared(txnId, isChecked) {
             await sb.from('transactions').update({ cleared: isChecked }).eq('id', txnId);
             const t = comp.transactions.find(x => x.id == txnId);
             if (t) t.cleared = isChecked;
             renderReconciliation();
         }
- 
+
         async function saveReconciliationSnapshot() {
             const date = document.getElementById('reconDate').value || todayStr;
             const stmtBal = parseFloat(document.getElementById('statementBal').value) || 0;
@@ -1161,12 +1172,12 @@
             await reloadAndRender();
             alert('Reconciliation record saved!');
         }
- 
+
         function renderReconHistory() {
             const el = document.getElementById('reconHistoryList');
             el.innerHTML = comp.reconciliations.slice().reverse().map(r => `<div>${r.date} — Statement $${r.stmtBal.toFixed(2)} — Variance ${r.variance}</div>`).join('') || '<div style="color:#94a3b8;">No saved reconciliations yet.</div>';
         }
- 
+
         // ---- FIXED ASSETS ----
         document.getElementById('assetForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1177,7 +1188,7 @@
             const life = parseInt(document.getElementById('assetLife').value) || 5;
             if (life < 3 || life > 40) { if (!confirm(`Useful life of ${life} years is outside the typical 3–40 year range. Continue anyway?`)) return; }
             if (salvage >= cost) return alert('Salvage value must be less than purchase cost.');
- 
+
             await sb.from('fixed_assets').insert({ company_id: activeCompanyId, name, date, cost, salvage, life, accum_depr: 0, disposed: false });
             await sb.from('transactions').insert({ company_id: activeCompanyId, type: 'ASSET', date, party: name, item: `Capital Equipment Asset (${life} yr life)`, amount: cost, status: 'Paid' });
             await addJournalEntry(date, `Capitalized Asset Purchase: ${name}`, [{ account: `Fixed Assets - ${name}`, amount: cost }], [{ account: 'Cash / Bank', amount: cost }]);
@@ -1188,14 +1199,14 @@
             await reloadAndRender();
             alert('Fixed asset capitalized!');
         });
- 
+
         async function processAnnualDepreciation() {
             const active = comp.fixedAssets.filter(a => !a.disposed);
             if (active.length === 0) return alert('No active fixed assets found to depreciate.');
             let totalRun = 0;
             const runDate = todayStr;
             const updates = [];
- 
+
             active.forEach(a => {
                 const depreciableBase = a.cost - a.salvage;
                 const remaining = depreciableBase - a.accumDepr;
@@ -1212,9 +1223,9 @@
                 updates.push({ id: a.id, newAccum: a.accumDepr + amountThisRun });
                 totalRun += amountThisRun;
             });
- 
+
             if (totalRun <= 0) return alert('All active assets are already fully depreciated.');
- 
+
             for (const u of updates) { await sb.from('fixed_assets').update({ accum_depr: u.newAccum }).eq('id', u.id); }
             await sb.from('transactions').insert({ company_id: activeCompanyId, type: 'DEPRECIATION', date: runDate, party: 'Internal Asset Depreciation', item: 'Straight-Line Depreciation Expense (prorated where applicable)', amount: totalRun, status: 'Paid' });
             await addJournalEntry(runDate, 'Recorded Straight-Line Depreciation', [{ account: 'Depreciation Expense', amount: totalRun }], [{ account: 'Accumulated Depreciation', amount: totalRun }]);
@@ -1222,7 +1233,7 @@
             await reloadAndRender();
             alert(`Depreciation of $${totalRun.toFixed(2)} processed across ${updates.length} asset(s).`);
         }
- 
+
         // ---- SALES ----
         document.getElementById('salesForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1234,7 +1245,7 @@
             const item = document.getElementById('itemSold').value;
             const date = document.getElementById('saleDate').value;
             const total = amt + tax;
- 
+
             let paidNow, balanceDue, status;
             if (method === 'Invoice') { paidNow = 0; balanceDue = total; status = 'Unpaid'; }
             else if (method === 'Split') {
@@ -1242,7 +1253,7 @@
                 if (paidNow <= 0 || paidNow >= total) return alert('For a split payment, "Cash Received Now" must be more than $0 and less than the total.');
                 balanceDue = total - paidNow; status = 'Partial';
             } else { paidNow = total; balanceDue = 0; status = 'Paid'; }
- 
+
             if (editId) {
                 await sb.from('transactions').update({ date, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status }).eq('id', editId);
                 await logAudit('EDIT_SALE', `${party} $${amt}`);
@@ -1266,7 +1277,7 @@
             toggleSplitFields();
             await reloadAndRender();
         });
- 
+
         // ---- EXPENSES / PURCHASES ----
         document.getElementById('purchaseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1279,11 +1290,11 @@
             const item = document.getElementById('itemBought').value;
             const date = document.getElementById('purchaseDate').value;
             const total = amt + tax;
- 
+
             const catObj = comp.categories.find(c => c.name === category);
             const catType = catObj ? catObj.type : 'Expense';
             const debitAccountName = catType === 'Inventory' ? 'Inventory (Asset)' : `${category} Expense`;
- 
+
             let paidNow, balanceDue, status;
             if (method === 'Bill') { paidNow = 0; balanceDue = total; status = 'Unpaid'; }
             else if (method === 'Split') {
@@ -1291,7 +1302,7 @@
                 if (paidNow <= 0 || paidNow >= total) return alert('For a split payment, "Cash Paid Now" must be more than $0 and less than the total.');
                 balanceDue = total - paidNow; status = 'Partial';
             } else { paidNow = total; balanceDue = 0; status = 'Paid'; }
- 
+
             if (editId) {
                 await sb.from('transactions').update({ date, category, method, party, item, amount: amt, tax, paid_now: paidNow, balance_due: balanceDue, status }).eq('id', editId);
                 await logAudit('EDIT_PURCHASE', `${party} $${amt}`);
@@ -1312,7 +1323,7 @@
             togglePurchaseSplitFields();
             await reloadAndRender();
         });
- 
+
         // ---- PAYROLL ----
         document.getElementById('payrollForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1325,9 +1336,9 @@
             const employerTax = parseFloat(document.getElementById('employerTax').value) || 0;
             const method = document.getElementById('payMethod').value;
             const net = gross - tax;
- 
+
             await sb.from('transactions').insert({ company_id: activeCompanyId, ref: 'PAY', type: 'PAYROLL', category: 'Payroll', date, period_start: periodStart, period_end: periodEnd, party, item: `Wages & Salary (${periodStart} to ${periodEnd})`, amount: net, gross, tax, employer_tax: employerTax, method, status: 'Paid' });
- 
+
             const debits = [{ account: 'Payroll Expense (Gross)', amount: gross }];
             const credits = [{ account: `Cash / Bank (${method}) - Net Pay`, amount: net }, { account: 'Employee Tax Withholding Payable', amount: tax }];
             if (employerTax > 0) { debits.push({ account: 'Employer Payroll Tax Expense', amount: employerTax }); credits.push({ account: 'Employer Payroll Tax Payable', amount: employerTax }); }
@@ -1340,7 +1351,7 @@
             document.getElementById('netPayDisplay').value = '';
             await reloadAndRender();
         });
- 
+
         document.getElementById('openingForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const cash = parseFloat(document.getElementById('opCash').value) || 0;
@@ -1352,7 +1363,7 @@
             await reloadAndRender();
             alert('Opening Balances saved!');
         });
- 
+
         async function openManualJournalEntry() {
             const date = prompt("Entry date (YYYY-MM-DD):", todayStr);
             if (!date) return;
@@ -1372,20 +1383,20 @@
             await reloadAndRender();
             alert('Manual journal entry recorded.');
         }
- 
+
         function clearDateFilter() {
             document.getElementById('filterStartDate').value = '';
             document.getElementById('filterEndDate').value = '';
             renderDashboard();
         }
- 
+
         function printCard(cardId) {
             const card = document.getElementById(cardId);
             card.classList.add('printable-section');
             window.print();
             card.classList.remove('printable-section');
         }
- 
+
         document.getElementById('grossPay').addEventListener('input', updateNetPay);
         document.getElementById('taxWithheld').addEventListener('input', updateNetPay);
         function updateNetPay() {
@@ -1393,7 +1404,7 @@
             const tax = parseFloat(document.getElementById('taxWithheld').value) || 0;
             document.getElementById('netPayDisplay').value = (gross - tax).toFixed(2);
         }
- 
+
         // Initialize date fields
         ['saleDate','purchaseDate','payDate','payPeriodStart','payPeriodEnd','equityDate','assetDate','reconDate'].forEach(id => {
             const el = document.getElementById(id);
@@ -1402,4 +1413,3 @@
     </script>
 </body>
 </html>
- 
